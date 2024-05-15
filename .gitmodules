@@ -1,0 +1,3 @@
+[submodule "fionna-web"]
+	path = fionna-web
+	url = https://github.com/omsage/fionna-web.git
