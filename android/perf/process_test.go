@@ -74,7 +74,7 @@ func TestGetProcCpu(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	pid, err := android_util.GetPidOnPackageName(device, "com.taou.maimai")
+	pid, err := android_util.GetPidOnPackageName(device, "com.baidu.tieba_mini")
 	if err != nil {
 		panic(err)
 	}

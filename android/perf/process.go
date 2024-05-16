@@ -2,6 +2,7 @@ package perf
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -357,6 +358,7 @@ func getProcCpuUsage(stat *entity.ProcessStat, pcf *procCpuConfig, nowTotalCPUTi
 	var nowProcCpuTime = float64(stat.Utime) + float64(stat.Stime) + float64(stat.Cutime) + float64(stat.Cstime)
 	if pcf.preProcCpuTime == -1.0 {
 		pcf.preProcCpuTime = nowProcCpuTime
+		pcf.preTotalCpuTime = nowTotalCPUTime
 		return 0.0
 	}
 
@@ -368,18 +370,30 @@ func getProcCpuUsage(stat *entity.ProcessStat, pcf *procCpuConfig, nowTotalCPUTi
 }
 
 func GetTotalCpuTime(device *gadb.Device) (float64, error) {
-	totalCpuInfo, err := device.RunShellCommand(fmt.Sprintf("cat /proc/stat"))
+	totalCpuInfo, err := device.RunShellCommandWithBytes(fmt.Sprintf("cat /proc/stat"))
 	if err != nil {
 		return 0, err
 	}
-	re := regexp.MustCompile(`cpu\s(.*?)\\r`)
-	totalCpuInfoMatch := re.FindStringSubmatch(totalCpuInfo)
-	totalCpuTimeList := strings.Fields(totalCpuInfoMatch[1])[:7]
-	totalCpuTime := 0
-	for _, val := range totalCpuTimeList {
-		cpuTime, _ := strconv.Atoi(val)
-		totalCpuTime += cpuTime
+
+	var (
+		nowCPU entity.SystemCpuRaw
+	)
+
+	//if preCPUMap == nil {
+	//	preCPUMap = make(map[string]entity.SystemCpuRaw)
+	//}
+
+	scanner := bufio.NewScanner(bytes.NewReader(totalCpuInfo))
+	for scanner.Scan() {
+		line := scanner.Text()
+		fields := strings.Fields(line)
+		if len(fields) > 0 && strings.HasPrefix(fields[0], "cpu") { // changing here if you want to get every cpu-core's stats
+			parseCPUFields(fields, &nowCPU)
+		}
 	}
+
+	totalCpuTime := nowCPU.User + nowCPU.Nice + nowCPU.System + nowCPU.Idle + nowCPU.Iowait + nowCPU.Irq + nowCPU.SoftIrq
+
 	return float64(totalCpuTime), nil
 }
 
