@@ -362,7 +362,7 @@ func getProcCpuUsage(stat *entity.ProcessStat, pcf *procCpuConfig, nowTotalCPUTi
 		return 0.0
 	}
 
-	cpuUtilization := ((nowProcCpuTime - pcf.preProcCpuTime) / (pcf.preTotalCpuTime - nowProcCpuTime)) * 100
+	cpuUtilization := ((nowProcCpuTime - pcf.preProcCpuTime) / (nowTotalCPUTime - pcf.preTotalCpuTime)) * 100
 	pcf.preProcCpuTime = nowProcCpuTime
 	pcf.preTotalCpuTime = nowTotalCPUTime
 
