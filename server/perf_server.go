@@ -432,7 +432,9 @@ func WebSocketPerf(r *gin.Engine) {
 								break
 							}
 							// todo uuid
-							var perfConfig = &entity.PerfConfig{}
+							var perfConfig = &entity.PerfConfig{
+								IntervalTime: 1,
+							}
 							err1 = json.Unmarshal(data, perfConfig)
 
 							if err1 == nil {

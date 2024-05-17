@@ -67,10 +67,10 @@ type PerfConfig struct {
 	CancelFn     context.CancelFunc `json:"-"   gorm:"-"`
 }
 
-func NewPerfOption(ctx context.Context, IntervalTime int, opts ...PerfOption) *PerfConfig {
+func NewPerfOption(ctx context.Context, opts ...PerfOption) *PerfConfig {
 	pcf := &PerfConfig{
 		Ctx:          ctx,
-		IntervalTime: IntervalTime,
+		IntervalTime: 1,
 	}
 	for _, opt := range opts {
 		opt(pcf)
