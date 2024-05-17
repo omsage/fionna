@@ -14,9 +14,9 @@ import (
 )
 
 var cliPerfCmd = &cobra.Command{
-	Use:   "cliPerf",
-	Short: "Fionna cli mode",
-	Long:  "Fionna cli mode",
+	Use:   "cli-perf",
+	Short: "Fionna perf cli mode",
+	Long:  "Fionna perf cli mode",
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		client, err := gadb.NewClient()
 		if err != nil {

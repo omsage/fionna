@@ -53,7 +53,9 @@ You can see that using the OMSage Frame Tool to obtain performance data for Fram
 
 ## Usage
 
-Download the corresponding build artifact through Release, extract it, and then directly execute the target program.
+### Quickstart
+
+Download the corresponding build artifact from Releases, and execute the corresponding target program after decompression.
 
 Execute directly in the command line:
 
@@ -61,7 +63,51 @@ Execute directly in the command line:
 fionna
 ```
 
-Then access the corresponding address in a browser: [http://127.0.0.1:3417](http://127.0.0.1:3417/)
+Then access the corresponding address in the browser: [http://127.0.0.1:3417](http://127.0.0.1:3417/)
+
+### Command Line Mode
+
+Fionna has a built-in simple command line mode, and you can input the following command to view instructions:
+
+```
+fionna --help
+```
+
+There are mainly two modes:
+
+#### web mode
+
+Execute the following command directly in the command line, and the program will directly start a web service. Then you can access the corresponding address: [http://127.0.0.1:3417](http://127.0.0.1:3417/)
+
+```
+fionna web
+```
+
+#### cli-perf mode
+
+Due to the strong dependency of web, a simple performance output mode is provided. Input the following command and you can get the corresponding performance data in the command line:
+
+```
+fionna cli-perf [flags]
+# Example:fionna cli-perf --fps
+```
+
+**flags**
+
+| Quick Usage | Option         | Parameter Type | Description                  |
+| ----------- | -------------- | -------------- | ---------------------------- |
+| -h          | --help         |                | Get help guide               |
+| -p          | --package      | string         | Application package name     |
+| -d          | --pid          | int            | Application PID (default -1) |
+|             | --proc-cpu     |                | Get process CPU data         |
+|             | --fps          |                | Get system FPS               |
+|             | --jank         |                | Get system jank information  |
+|             | --proc-mem     |                | Get process memory data      |
+|             | --proc-threads |                | Get process thread count     |
+| -s          | --serial       | string         | Device serial number         |
+|             | --sys-cpu      |                | Get system CPU data          |
+|             | --sys-mem      |                | Get system memory data       |
+|             | --sys-network  |                | Get system network data      |
 
 ## Development
 

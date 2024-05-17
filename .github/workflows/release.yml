@@ -3,7 +3,7 @@ name: goreleaser
 on:
   push:
     tags:
-      - 'v*'
+      - "v*.*.*"
 
 jobs:
   goreleaser:
@@ -37,6 +37,10 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.18
+
+      - name: replace version
+        run: ver=${{ steps.previoustag.outputs.tag }} && new_ver=${ver:1} && sed -i "s/FIONNA_VERSION/${new_ver}/g" cmd/version.go
+
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
