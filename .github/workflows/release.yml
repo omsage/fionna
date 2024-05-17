@@ -13,6 +13,10 @@ jobs:
       - name: Checkout main repository
         uses: actions/checkout@v2
 
+      - name: 'Get Previous tag'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
       - name: Initialize submodules
         run: git submodule update --init --recursive
 
