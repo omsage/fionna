@@ -80,7 +80,7 @@ func startGetPerf(device *gadb.Device, config entity.PerfConfig) {
 
 		go func() {
 			perf.GetSysFrame(device, config, func(frame *entity.SysFrameInfo, code entity.ServerCode) {
-				data, err := json.Marshal(frame)
+				data, err := json.Marshal(&entity.PerfData{SystemPerfData: &entity.SystemInfo{Frame: frame}})
 				if err != nil {
 					panic(err)
 				}
@@ -93,7 +93,7 @@ func startGetPerf(device *gadb.Device, config entity.PerfConfig) {
 
 		go func() {
 			perf.GetSysCPU(device, config, func(CPU map[string]*entity.SystemCPUInfo, code entity.ServerCode) {
-				data, err := json.Marshal(CPU)
+				data, err := json.Marshal(&entity.PerfData{SystemPerfData: &entity.SystemInfo{CPU: CPU}})
 				if err != nil {
 					panic(err)
 				}
@@ -106,7 +106,7 @@ func startGetPerf(device *gadb.Device, config entity.PerfConfig) {
 
 		go func() {
 			perf.GetSysMem(device, config, func(sysMem *entity.SystemMemInfo, code entity.ServerCode) {
-				data, err := json.Marshal(sysMem)
+				data, err := json.Marshal(&entity.PerfData{SystemPerfData: &entity.SystemInfo{MemInfo: sysMem}})
 				if err != nil {
 					panic(err)
 				}
@@ -118,7 +118,7 @@ func startGetPerf(device *gadb.Device, config entity.PerfConfig) {
 	if config.SysNetwork {
 		go func() {
 			perf.GetSysNetwork(device, config, func(sysNet map[string]*entity.SystemNetworkInfo, code entity.ServerCode) {
-				data, err := json.Marshal(sysNet)
+				data, err := json.Marshal(&entity.PerfData{SystemPerfData: &entity.SystemInfo{NetworkInfo: sysNet}})
 				if err != nil {
 					panic(err)
 				}
@@ -133,7 +133,7 @@ func startGetPerf(device *gadb.Device, config entity.PerfConfig) {
 		go func() {
 			perf.GetProcCPU(device, config, func(cpuInfo *entity.ProcCpuInfo, code entity.ServerCode) {
 
-				data, err := json.Marshal(cpuInfo)
+				data, err := json.Marshal(&entity.PerfData{ProcPerfData: &entity.ProcessInfo{CPUInfo: cpuInfo}})
 				if err != nil {
 					panic(err)
 				}
@@ -147,7 +147,7 @@ func startGetPerf(device *gadb.Device, config entity.PerfConfig) {
 
 		go func() {
 			perf.GetProcMem(device, config, func(memInfo *entity.ProcMemInfo, code entity.ServerCode) {
-				data, err := json.Marshal(memInfo)
+				data, err := json.Marshal(&entity.PerfData{ProcPerfData: &entity.ProcessInfo{MemInfo: memInfo}})
 				if err != nil {
 					panic(err)
 				}
@@ -160,7 +160,7 @@ func startGetPerf(device *gadb.Device, config entity.PerfConfig) {
 	if config.ProcThread {
 		go func() {
 			perf.GetProcThreads(device, config, func(threadInfo *entity.ProcThreadsInfo, code entity.ServerCode) {
-				data, err := json.Marshal(threadInfo)
+				data, err := json.Marshal(&entity.PerfData{ProcPerfData: &entity.ProcessInfo{ThreadInfo: threadInfo}})
 				if err != nil {
 					panic(err)
 				}
@@ -172,7 +172,7 @@ func startGetPerf(device *gadb.Device, config entity.PerfConfig) {
 	if config.SysTemperature {
 		go func() {
 			perf.GetSysTemperature(device, config, func(temperatureInfo *entity.SysTemperature, code entity.ServerCode) {
-				data, err := json.Marshal(temperatureInfo)
+				data, err := json.Marshal(&entity.PerfData{SystemPerfData: &entity.SystemInfo{Temperature: temperatureInfo}})
 				if err != nil {
 					panic(err)
 				}

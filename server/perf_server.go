@@ -128,7 +128,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				db.Create(sysFrameInfo)
 
-				perfData := &entity.PerfData{SystemPerfData: entity.SystemInfo{Frame: sysFrameInfo}}
+				perfData := &entity.PerfData{SystemPerfData: &entity.SystemInfo{Frame: sysFrameInfo}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
 				if err != nil {
 					log.Error("perf conn send sys frame fail,close perf....", err)
@@ -169,7 +169,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 					count++
 				}
 
-				perfData := &entity.PerfData{SystemPerfData: entity.SystemInfo{CPU: CPU}}
+				perfData := &entity.PerfData{SystemPerfData: &entity.SystemInfo{CPU: CPU}}
 
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
 				if err != nil {
@@ -198,7 +198,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				count++
 
-				perfData := &entity.PerfData{SystemPerfData: entity.SystemInfo{MemInfo: sysMem}}
+				perfData := &entity.PerfData{SystemPerfData: &entity.SystemInfo{MemInfo: sysMem}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
 				if err != nil {
 					log.Error("perf conn send sys mem fail,close perf....", err)
@@ -250,7 +250,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				}
 				count++
-				perfData := &entity.PerfData{SystemPerfData: entity.SystemInfo{NetworkInfo: sysNet}}
+				perfData := &entity.PerfData{SystemPerfData: &entity.SystemInfo{NetworkInfo: sysNet}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
 				if err != nil {
 					log.Error("perf conn send sys network fail,close perf....", err)
@@ -281,7 +281,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				count++
 
-				perfData := &entity.PerfData{ProcPerfData: entity.ProcessInfo{CPUInfo: cpuInfo}}
+				perfData := &entity.PerfData{ProcPerfData: &entity.ProcessInfo{CPUInfo: cpuInfo}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
 				if err != nil {
 					log.Error("perf conn send proc cpu fail,close perf....", err)
@@ -315,7 +315,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				count++
 
-				perfData := &entity.PerfData{ProcPerfData: entity.ProcessInfo{MemInfo: memInfo}}
+				perfData := &entity.PerfData{ProcPerfData: &entity.ProcessInfo{MemInfo: memInfo}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
 				if err != nil {
 					log.Error("perf conn send proc mem fail,close perf....", err)
@@ -333,7 +333,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 				threadInfo.UUID = config.UUID
 				db.Create(threadInfo)
 
-				perfData := &entity.PerfData{ProcPerfData: entity.ProcessInfo{ThreadInfo: threadInfo}}
+				perfData := &entity.PerfData{ProcPerfData: &entity.ProcessInfo{ThreadInfo: threadInfo}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
 				if err != nil {
 					log.Error("perf conn send proc thread fail,close perf....", err)
@@ -371,7 +371,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 				}
 				count++
 
-				perfData := &entity.PerfData{SystemPerfData: entity.SystemInfo{Temperature: temperatureInfo}}
+				perfData := &entity.PerfData{SystemPerfData: &entity.SystemInfo{Temperature: temperatureInfo}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
 				if err != nil {
 					log.Error("perf conn send sys temperature fail,close perf....", err)

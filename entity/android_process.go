@@ -87,13 +87,10 @@ type ProcessStatus struct {
 }
 
 type ProcessInfo struct {
-	Activity   string           `json:"currentActivity,omitempty"`
-	Name       string           `json:"name"`
-	Pid        string           `json:"pid"`
 	CPUInfo    *ProcCpuInfo     `json:"cpuInfo,omitempty"`
 	MemInfo    *ProcMemInfo     `json:"memInfo,omitempty"`
 	ThreadInfo *ProcThreadsInfo `json:"threadInfo,omitempty"`
-	Error      []string         `json:"error"`
+	Error      []string         `json:"error,omitempty"`
 }
 
 // 都是MB为单位

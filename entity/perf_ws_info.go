@@ -19,8 +19,8 @@ type PerfRecvMessage struct {
 }
 
 type PerfData struct {
-	SystemPerfData SystemInfo  `json:"system"`
-	ProcPerfData   ProcessInfo `json:"process"`
+	SystemPerfData *SystemInfo  `json:"system,omitempty"`
+	ProcPerfData   *ProcessInfo `json:"process,omitempty"`
 }
 
 func NewPerfDataMessage(PerfData *PerfData) *PerfDataMessage {

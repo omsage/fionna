@@ -58,7 +58,7 @@ type SystemInfo struct {
 	CPU         map[string]*SystemCPUInfo     `json:"cpuInfo,omitempty"`
 	Frame       *SysFrameInfo                 `json:"frame,omitempty"`
 	Temperature *SysTemperature               `json:"temperature,omitempty"`
-	Error       []string                      `json:"error"`
+	Error       []string                      `json:"error,omitempty"`
 	//Timestamp   int64                         `json:"timeStamp"`
 }
 
