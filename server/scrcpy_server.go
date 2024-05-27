@@ -57,7 +57,7 @@ func WebSocketScrcpy(r *gin.Engine) {
 					if err != nil {
 						log.Error("read message steam err:", err)
 						ws.WriteJSON(entity.NewScrcpyError("read message steam err:" + err.Error()))
-						break
+						scrcpyClient.ClientStop()
 					} else {
 						if message.MessageType == entity.ScrcpyTouchType {
 							data, err1 := json.Marshal(message.Data)

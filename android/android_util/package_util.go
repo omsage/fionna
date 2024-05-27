@@ -47,10 +47,10 @@ func extractPackageNames(output string) []string {
 	return packages
 }
 
-func GetCurrentPackageName(device *gadb.Device) (string, error) {
+func GetCurrentPackageNameAndPid(device *gadb.Device) (string, string, error) {
 	data, err := device.RunShellCommand("dumpsys activity top | grep ACTIVITY")
 	if err != nil {
-		return "", fmt.Errorf("exec command erro : " + "dumpsys activity top | grep ACTIVITY")
+		return "", "", fmt.Errorf("exec command erro : " + "dumpsys activity top | grep ACTIVITY")
 	}
 
 	var dataSplit []string
@@ -67,10 +67,15 @@ func GetCurrentPackageName(device *gadb.Device) (string, error) {
 
 	dataSplit = strings.Split(currentActivityLineStr, " ")
 	if len(dataSplit) > 1 {
-		dataSplit = strings.Split(dataSplit[1], "/")
-		return dataSplit[0], nil
+		packageNameSplit := strings.Split(dataSplit[1], "/")
+		for _, param := range dataSplit {
+			if strings.Contains(param, "pid=") {
+				return packageNameSplit[0], strings.ReplaceAll(param, "pid=", ""), nil
+			}
+		}
+		return packageNameSplit[0], "", nil
 	} else {
-		return "", errors.New("not get current package name")
+		return "", "", errors.New("not get current package name")
 	}
 }
 

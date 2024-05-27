@@ -67,7 +67,7 @@ func GroupAndroidPackageUrl(r *gin.Engine) {
 			}
 			return
 		}
-		packageName, err := android_util.GetCurrentPackageName(device)
+		packageName, pid, err := android_util.GetCurrentPackageNameAndPid(device)
 		if err != nil {
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: "current package get error",
@@ -77,7 +77,10 @@ func GroupAndroidPackageUrl(r *gin.Engine) {
 			return
 		}
 		c.JSON(http.StatusOK, entity.ResponseData{
-			Data: packageName,
+			Data: map[string]string{
+				"packageName": packageName,
+				"pid":         pid,
+			},
 			Code: entity.RequestSucceed,
 		})
 	})

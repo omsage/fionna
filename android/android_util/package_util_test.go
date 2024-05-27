@@ -43,11 +43,11 @@ func TestGetCurrentPackageName(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	packageName, err := GetCurrentPackageName(device)
+	packageName, pid, err := GetCurrentPackageNameAndPid(device)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(packageName)
+	fmt.Println(packageName, pid)
 }
 
 func TestGetSerialList(t *testing.T) {

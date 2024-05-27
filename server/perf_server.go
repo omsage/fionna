@@ -451,7 +451,9 @@ func WebSocketPerf(r *gin.Engine) {
 
 								var testName = ""
 
-								if perfConfig.PackageName != "" {
+								if perfConfig.PackageName != "" && perfConfig.Pid != "" {
+									testName = fmt.Sprintf("%s_%s_%s_pid%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.PackageName, perfConfig.Pid, formattedTime)
+								} else if perfConfig.PackageName != "" && perfConfig.Pid == "" {
 
 									testName = fmt.Sprintf("%s_%s_%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.PackageName, formattedTime)
 
@@ -462,6 +464,8 @@ func WebSocketPerf(r *gin.Engine) {
 										ws.WriteJSON(entity.NewPerfDataError("get pid err:" + err.Error()))
 										break
 									}
+								} else if perfConfig.PackageName == "" && perfConfig.Pid != "" {
+									testName = fmt.Sprintf("%s_%s_pid%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.Pid, formattedTime)
 								} else {
 									testName = fmt.Sprintf("%s_%s_%s", serialInfo.ProductDevice, serialInfo.Model, formattedTime)
 								}
