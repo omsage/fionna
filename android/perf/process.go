@@ -435,7 +435,7 @@ func GetProcCPU(device *gadb.Device, perfOption entity.PerfConfig, procCPUCallBa
 	timer := time.Tick(time.Duration(perfOption.IntervalTime * int(time.Second)))
 	pcf := newProcCPUConfig()
 	pcf.IntervalTime = perfOption.IntervalTime
-
+	isNoFirst := false
 	go func() {
 		for {
 			select {
@@ -447,19 +447,27 @@ func GetProcCPU(device *gadb.Device, perfOption entity.PerfConfig, procCPUCallBa
 					if err != nil {
 						// todo
 						log.Error(err)
-						procCPUCallBackFn(nil, entity.GetPerfErr)
+						procCPUCallBackFn(&entity.ProcCpuInfo{
+							Timestamp: time.Now().UnixMilli(),
+						}, entity.GetPerfErr)
 						return
 					}
 					nowTotalCPUTime, err := GetTotalCpuTime(device)
 					if err != nil {
 						log.Error(err)
-						procCPUCallBackFn(nil, entity.GetPerfErr)
+						procCPUCallBackFn(&entity.ProcCpuInfo{
+							Timestamp: time.Now().UnixMilli(),
+						}, entity.GetPerfErr)
 						return
 					}
-					procCPUCallBackFn(&entity.ProcCpuInfo{
-						CpuUtilization: getProcCpuUsage(stat, pcf, nowTotalCPUTime),
-						Timestamp:      time.Now().UnixMilli(),
-					}, entity.RequestSucceed)
+					cpuUtilization := getProcCpuUsage(stat, pcf, nowTotalCPUTime)
+					if isNoFirst {
+						procCPUCallBackFn(&entity.ProcCpuInfo{
+							CpuUtilization: cpuUtilization,
+							Timestamp:      time.Now().UnixMilli(),
+						}, entity.RequestSucceed)
+					}
+					isNoFirst = true
 				}()
 			}
 		}

@@ -37,15 +37,18 @@ func init() {
 	}
 }
 
-func InitDB() {
+func InitDB(dbName string) {
 	var err error
-	var gConfig = &gorm.Config{}
+	var gConfig = &gorm.Config{
+		SkipDefaultTransaction: true,
+		PrepareStmt:            true,
+	}
 
 	if !isSQLDebug {
 		gConfig.Logger = logger.Default.LogMode(logger.Silent)
 	}
 
-	db, err = gorm.Open(sqlite.Open("test.db"), gConfig)
+	db, err = gorm.Open(sqlite.Open(dbName), gConfig)
 	if err != nil {
 		panic("failed to connect database")
 	}

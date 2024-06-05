@@ -31,7 +31,7 @@ func runWeb() {
 		c.Data(http.StatusOK, mimeType, data)
 	})
 
-	server.InitDB()
+	server.InitDB(dbName)
 
 	server.GroupAndroidSerialUrl(r)
 	server.GroupAndroidPackageUrl(r)
@@ -51,6 +51,7 @@ func runWeb() {
 var (
 	dist      embed.FS
 	indexHtml []byte
+	dbName    string
 )
 
 func SetEmbed(distParam embed.FS, indexHtmlParam []byte) {
@@ -70,4 +71,5 @@ var webCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(webCmd)
+	webCmd.Flags().StringVarP(&dbName, "db-name", "d", "test.db", "specify the sql lite name to use")
 }

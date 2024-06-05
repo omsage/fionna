@@ -27,6 +27,7 @@ func TestGetDevice(t *testing.T) {
 }
 
 func TestGetPackageNameList(t *testing.T) {
+	SetClient()
 	device, err := GetDevice(client, "")
 	if err != nil {
 		panic(err)
@@ -39,6 +40,7 @@ func TestGetPackageNameList(t *testing.T) {
 }
 
 func TestGetCurrentPackageName(t *testing.T) {
+	SetClient()
 	device, err := GetDevice(client, "")
 	if err != nil {
 		panic(err)
@@ -51,6 +53,7 @@ func TestGetCurrentPackageName(t *testing.T) {
 }
 
 func TestGetSerialList(t *testing.T) {
+	SetClient()
 	serialList, err := GetSerialList(client)
 	if err != nil {
 		panic(err)

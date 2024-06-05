@@ -162,7 +162,7 @@ func TestAndroidCurrentPackageName(t *testing.T) {
 
 func TestReportList(t *testing.T) {
 	r := getGinEngine()
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -190,7 +190,7 @@ func TestReportList(t *testing.T) {
 func TestReportGetConfig(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -216,7 +216,7 @@ func TestReportGetConfig(t *testing.T) {
 func TestReportGetSummary(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -242,7 +242,7 @@ func TestReportGetSummary(t *testing.T) {
 func TestReportGetProcCpuData(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -268,7 +268,7 @@ func TestReportGetProcCpuData(t *testing.T) {
 func TestReportGetProcMemData(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -294,7 +294,7 @@ func TestReportGetProcMemData(t *testing.T) {
 func TestReportGetThreadData(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -320,7 +320,7 @@ func TestReportGetThreadData(t *testing.T) {
 func TestReportGetSysNetworkData(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -346,7 +346,7 @@ func TestReportGetSysNetworkData(t *testing.T) {
 func TestReportGetSysMemData(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -372,7 +372,7 @@ func TestReportGetSysMemData(t *testing.T) {
 func TestReportGetSysCpuData(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -398,7 +398,7 @@ func TestReportGetSysCpuData(t *testing.T) {
 func TestReportGetSysFrameData(t *testing.T) {
 	r := getGinEngine()
 	server.SetSQLDebug(true)
-	server.InitDB()
+	server.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{

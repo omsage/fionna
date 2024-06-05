@@ -197,6 +197,7 @@ func init() {
 	cliPerfCmd.Flags().BoolVar(&perfConfig.SysCpu, "sys-cpu", false, "get system cpu data")
 	cliPerfCmd.Flags().BoolVar(&perfConfig.SysMem, "sys-mem", false, "get system memory data")
 	cliPerfCmd.Flags().BoolVar(&perfConfig.SysNetwork, "sys-network", false, "get system networking data")
+	cliPerfCmd.Flags().BoolVar(&perfConfig.SysTemperature, "sys-temperature", false, "get system temperature data")
 	cliPerfCmd.Flags().BoolVar(&perfConfig.FPS, "fps", false, "get fps data")
 	cliPerfCmd.Flags().BoolVar(&perfConfig.Jank, "jank", false, "get jank data")
 	cliPerfCmd.Flags().BoolVar(&perfConfig.ProcThread, "proc-threads", false, "get process threads")

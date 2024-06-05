@@ -20,7 +20,7 @@ func TestGetSysMem(t *testing.T) {
 
 	ctx, exitFn := context.WithCancel(context.Background())
 
-	perfOption := entity.NewPerfOption(ctx, 1)
+	perfOption := entity.NewPerfOption(ctx)
 
 	perf.GetSysMem(device, *perfOption, func(sysMem *entity.SystemMemInfo, code entity.ServerCode) {
 		data, _ := json.Marshal(sysMem)
@@ -39,7 +39,7 @@ func TestGetSysFrame(t *testing.T) {
 	}
 
 	ctx, exitFn := context.WithCancel(context.Background())
-	perfOption := entity.NewPerfOption(ctx, 1)
+	perfOption := entity.NewPerfOption(ctx)
 
 	perf.GetSysFrame(device, *perfOption, func(frame *entity.SysFrameInfo, code entity.ServerCode) {
 		data, _ := json.Marshal(frame)
@@ -58,7 +58,7 @@ func TestGetSysNetwork(t *testing.T) {
 	}
 
 	ctx, exitFn := context.WithCancel(context.Background())
-	perfOption := entity.NewPerfOption(ctx, 1)
+	perfOption := entity.NewPerfOption(ctx)
 
 	perf.GetSysNetwork(device, *perfOption, func(sysNet map[string]*entity.SystemNetworkInfo, code entity.ServerCode) {
 		data, _ := json.Marshal(sysNet)
@@ -77,7 +77,7 @@ func TestGetSysCpu(t *testing.T) {
 	}
 
 	ctx, exitFn := context.WithCancel(context.Background())
-	perfOption := entity.NewPerfOption(ctx, 1)
+	perfOption := entity.NewPerfOption(ctx)
 
 	perf.GetSysCPU(device, *perfOption, func(CPU map[string]*entity.SystemCPUInfo, code entity.ServerCode) {
 		data, _ := json.Marshal(CPU)
@@ -98,7 +98,7 @@ func TestGetSysTemperature(t *testing.T) {
 	}
 
 	ctx, exitFn := context.WithCancel(context.Background())
-	perfOption := entity.NewPerfOption(ctx, 1)
+	perfOption := entity.NewPerfOption(ctx)
 
 	perf.GetSysTemperature(device, *perfOption, func(info *entity.SysTemperature, code entity.ServerCode) {
 		data, _ := json.Marshal(info)

@@ -228,7 +228,7 @@ func (s *PerfTool) getFrameSteam() {
 
 func (s *PerfTool) GetFrame(getBackCall func(frame *entity.SysFrameInfo, code entity.ServerCode)) {
 	ticker := time.NewTicker(1 * time.Second)
-	//isExit := false
+	isNoFirst := false
 	go func() {
 		for {
 			<-ticker.C
@@ -237,11 +237,14 @@ func (s *PerfTool) GetFrame(getBackCall func(frame *entity.SysFrameInfo, code en
 			}
 			select {
 			case perfData, ok := <-s.perfFrameDataChan:
+				isNoFirst = true
 				if ok && getBackCall != nil {
 					getBackCall(perfData, entity.RequestSucceed)
 				}
 			default:
-				getBackCall(&entity.SysFrameInfo{Timestamp: time.Now().UnixMilli()}, entity.RequestSucceed)
+				if isNoFirst {
+					getBackCall(&entity.SysFrameInfo{Timestamp: time.Now().UnixMilli()}, entity.RequestSucceed)
+				}
 			}
 		}
 	}()

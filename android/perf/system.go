@@ -255,9 +255,9 @@ func GetSysCPU(device *gadb.Device, perfOption entity.PerfConfig, sysCpuCallBack
 		preCPUMap: make(map[string]entity.SystemCpuRaw),
 		preCPU:    entity.SystemCpuRaw{},
 	}
-	_ = getCPU(device, &entity.SystemInfo{}, preCpuInfo)
 	time.Sleep(time.Duration(perfOption.IntervalTime * int(time.Second)))
 	timer := time.Tick(time.Duration(perfOption.IntervalTime * int(time.Second)))
+	isNoFirst := false
 	go func() {
 		for {
 			select {
@@ -273,7 +273,10 @@ func GetSysCPU(device *gadb.Device, perfOption entity.PerfConfig, sysCpuCallBack
 						sysCpuCallBackFn(nil, entity.GetPerfErr)
 						return
 					}
-					sysCpuCallBackFn(systemInfo.CPU, entity.RequestSucceed)
+					if isNoFirst {
+						sysCpuCallBackFn(systemInfo.CPU, entity.RequestSucceed)
+					}
+					isNoFirst = true
 				}()
 			}
 		}

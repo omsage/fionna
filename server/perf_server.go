@@ -119,14 +119,15 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 				frameDataSummary(frameOverview, sysFrameInfo, count)
 
 				count++
+				go func() {
+					if count == 1 {
+						db.Create(frameOverview)
+					} else {
+						db.Save(frameOverview)
+					}
 
-				if count == 1 {
-					db.Create(frameOverview)
-				} else {
-					db.Save(frameOverview)
-				}
-
-				db.Create(sysFrameInfo)
+					db.Create(sysFrameInfo)
+				}()
 
 				perfData := &entity.PerfData{SystemPerfData: &entity.SystemInfo{Frame: sysFrameInfo}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
@@ -149,7 +150,6 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				for cpuName, value := range CPU {
 					value.UUID = config.UUID
-					db.Create(value)
 
 					systemCPUOverview := systemCPUOverviewInfo[value.CPUName]
 
@@ -160,11 +160,14 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 					}
 					sysCpuDataSummary(systemCPUOverview, value, count)
 
-					if count == 0 {
-						db.Create(systemCPUOverview)
-					} else {
-						db.Save(systemCPUOverview)
-					}
+					go func() {
+						db.Create(value)
+						if count == 0 {
+							db.Create(systemCPUOverview)
+						} else {
+							db.Save(systemCPUOverview)
+						}
+					}()
 
 					count++
 				}
@@ -186,15 +189,17 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 		go func() {
 			perf.GetSysMem(device, config, func(sysMem *entity.SystemMemInfo, code entity.ServerCode) {
 				sysMem.UUID = config.UUID
-				db.Create(sysMem)
 
 				sysMemDataSummary(sysMemOverview, sysMem, count)
 
-				if count == 0 {
-					db.Create(sysMemOverview)
-				} else {
-					db.Save(sysMemOverview)
-				}
+				go func() {
+					db.Create(sysMem)
+					if count == 0 {
+						db.Create(sysMemOverview)
+					} else {
+						db.Save(sysMemOverview)
+					}
+				}()
 
 				count++
 
@@ -234,19 +239,19 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 					sysNetOverview := sysNetOverviews[name]
 
-					db.Create(value)
 					//if strings.Contains(value.InterfaceName, "wlan") {
 
 					sysNetOverview.AllSysTxData += value.Tx
 					sysNetOverview.AllSysRxData += value.Rx
 
-					if count == 0 {
-						db.Create(sysNetOverview)
-					} else {
-						db.Save(sysNetOverview)
-					}
-
-					//}
+					go func() {
+						db.Create(value)
+						if count == 0 {
+							db.Create(sysNetOverview)
+						} else {
+							db.Save(sysNetOverview)
+						}
+					}()
 
 				}
 				count++
@@ -269,15 +274,17 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 		go func() {
 			perf.GetProcCPU(device, config, func(cpuInfo *entity.ProcCpuInfo, code entity.ServerCode) {
 				cpuInfo.UUID = config.UUID
-				db.Create(cpuInfo)
 
 				procCpuDataSummary(procCpuOverview, cpuInfo, count)
 
-				if count == 0 {
-					db.Create(procCpuOverview)
-				} else {
-					db.Save(procCpuOverview)
-				}
+				go func() {
+					db.Create(cpuInfo)
+					if count == 0 {
+						db.Create(procCpuOverview)
+					} else {
+						db.Save(procCpuOverview)
+					}
+				}()
 
 				count++
 
@@ -299,7 +306,6 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 			perf.GetProcMem(device, config, func(memInfo *entity.ProcMemInfo, code entity.ServerCode) {
 
 				memInfo.UUID = config.UUID
-				db.Create(memInfo)
 
 				procMemDataSummary(procMemOverview, memInfo, count)
 				//
@@ -307,11 +313,14 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 				//
 				//fmt.Println(string(data))
 
-				if count == 0 {
-					db.Create(procMemOverview)
-				} else {
-					db.Save(procMemOverview)
-				}
+				go func() {
+					db.Create(memInfo)
+					if count == 0 {
+						db.Create(procMemOverview)
+					} else {
+						db.Save(procMemOverview)
+					}
+				}()
 
 				count++
 
@@ -331,7 +340,9 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 			perf.GetProcThreads(device, config, func(threadInfo *entity.ProcThreadsInfo, code entity.ServerCode) {
 
 				threadInfo.UUID = config.UUID
-				db.Create(threadInfo)
+				go func() {
+					db.Create(threadInfo)
+				}()
 
 				perfData := &entity.PerfData{ProcPerfData: &entity.ProcessInfo{ThreadInfo: threadInfo}}
 				err := perfConn.WriteJSON(entity.NewPerfDataMessage(perfData))
@@ -354,7 +365,6 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 			perf.GetSysTemperature(device, config, func(temperatureInfo *entity.SysTemperature, code entity.ServerCode) {
 
 				temperatureInfo.UUID = config.UUID
-				db.Create(temperatureInfo)
 
 				sysTemperatureDataSummary(sysTemperatureSummary, temperatureInfo)
 
@@ -364,11 +374,15 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				sysTemperatureSummary.DiffTemperature = sysTemperatureSummary.MaxTemperature - initTemperature
 
-				if count == 0 {
-					db.Create(sysTemperatureSummary)
-				} else {
-					db.Save(sysTemperatureSummary)
-				}
+				go func() {
+					db.Create(temperatureInfo)
+					if count == 0 {
+						db.Create(sysTemperatureSummary)
+					} else {
+						db.Save(sysTemperatureSummary)
+					}
+				}()
+
 				count++
 
 				perfData := &entity.PerfData{SystemPerfData: &entity.SystemInfo{Temperature: temperatureInfo}}
