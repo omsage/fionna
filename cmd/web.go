@@ -71,5 +71,5 @@ var webCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(webCmd)
-	webCmd.Flags().StringVarP(&dbName, "db-name", "d", "test.db", "specify the sql lite name to use")
+	webCmd.Flags().StringVarP(&dbName, "db-path", "d", "test.db", "specify the SQLite path to use")
 }

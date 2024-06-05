@@ -83,6 +83,13 @@ Execute the following command directly in the command line, and the program will
 fionna web
 ```
 
+Of course, in web mode, you can also specify the SQLite DB file to use.
+
+```
+fionna web -d <db path>
+# Example:fionna fionna web -d ./exapmle/my.db
+```
+
 #### cli-perf mode
 
 Due to the strong dependency of web, a simple performance output mode is provided. Input the following command and you can get the corresponding performance data in the command line:

@@ -87,6 +87,13 @@ fionna --help
 fionna web
 ```
 
+当然，在web模式下，也可以指定使用的SQLite DB文件：
+
+```
+fionna web -d <db path>
+# 参考示例:fionna fionna web -d ./exapmle/my.db
+```
+
 #### cli-perf模式
 
 由于web的依赖性太强，所以提供一个简单的性能输出模式，输入以下命令，即可在命令行中得到对应的性能数据：
