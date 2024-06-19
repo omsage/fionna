@@ -387,8 +387,17 @@ func GetTotalCpuTime(device *gadb.Device) (float64, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		fields := strings.Fields(line)
+
 		if len(fields) > 0 && strings.HasPrefix(fields[0], "cpu") { // changing here if you want to get every cpu-core's stats
-			parseCPUFields(fields, &nowCPU)
+			var tempCPU entity.SystemCpuRaw
+			parseCPUFields(fields, &tempCPU)
+			nowCPU.User += tempCPU.User
+			nowCPU.Nice += tempCPU.Nice
+			nowCPU.System += tempCPU.System
+			nowCPU.Idle += tempCPU.Idle
+			nowCPU.Iowait += tempCPU.Iowait
+			nowCPU.Irq += tempCPU.Irq
+			nowCPU.SoftIrq += tempCPU.SoftIrq
 		}
 	}
 
