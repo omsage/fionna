@@ -21,6 +21,8 @@ var rootCmd = &cobra.Command{
 ██╔══╝   ██║ ██║   ██║ ██║╚██╗██║ ██║╚██╗██║ ██╔══██║
 ██║      ██║ ╚██████╔╝ ██║ ╚████║ ██║ ╚████║ ██║  ██║
 ╚═╝      ╚═╝  ╚═════╝  ╚═╝  ╚═══╝ ╚═╝  ╚═══╝ ╚═╝  ╚═╝
+                Author: omsage org
+                 License: AGPL v3
                                                 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		runWeb()
