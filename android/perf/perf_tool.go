@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"context"
 	_ "embed"
-	"encoding/binary"
-	"encoding/json"
 	"fionna/android/gadb"
 	"fionna/entity"
 	"fmt"
+	"github.com/goccy/go-json"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"math/rand"
@@ -21,33 +20,18 @@ import (
 
 type PerfTool struct {
 	dev               *gadb.Device
-	localPort         int
 	width, height     int
-	perfToolLn        net.Listener
-	frameSocket       net.Conn
 	exitCallBackFunc  context.CancelFunc
 	exitCtx           context.Context
 	perfFrameDataChan chan *entity.SysFrameInfo
 }
 
 func NewPerfTool(device *gadb.Device, exitCtx context.Context) *PerfTool {
-	// todo
-	ln, err := net.Listen("tcp", ":0") // 0表示随机端口
-	if err != nil {
-		return nil
-	}
-
-	tcpAddr, ok := ln.Addr().(*net.TCPAddr)
-	if !ok {
-		return nil
-	}
 
 	ctx, exitFunc := context.WithCancel(exitCtx)
 
 	return &PerfTool{
 		dev:               device,
-		perfToolLn:        ln,
-		localPort:         tcpAddr.Port,
 		exitCtx:           ctx,
 		exitCallBackFunc:  exitFunc,
 		perfFrameDataChan: make(chan *entity.SysFrameInfo),
@@ -89,20 +73,22 @@ func (s *PerfTool) Init() {
 	// 生成随机整数
 	randomInt := rand.Intn(100000) // 生成0到99之间的随机整数
 
-	abi, _ := s.dev.RunShellCommand("getprop ro.product.cpu.abi")
-
+	abi, err := s.dev.RunShellCommand("getprop ro.product.cpu.abi")
+	if err != nil {
+		panic(err)
+	}
 	libPushPath := path.Join(perfToolLibRemotePath, "libPerfTool.so")
 
 	if strings.Contains(abi, "arm64-v8a") {
-		s.dev.Push(bytes.NewReader(libArm64), libPushPath, time.Now())
+		err = s.dev.Push(bytes.NewReader(libArm64), libPushPath, time.Now())
 	} else if strings.Contains(abi, "armeabi-v7a") {
-		s.dev.Push(bytes.NewReader(libArm32), libPushPath, time.Now())
+		err = s.dev.Push(bytes.NewReader(libArm32), libPushPath, time.Now())
 	} else if strings.Contains(abi, "x86") {
-		s.dev.Push(bytes.NewReader(lib86), libPushPath, time.Now())
+		err = s.dev.Push(bytes.NewReader(lib86), libPushPath, time.Now())
 	} else {
-		s.dev.Push(bytes.NewReader(lib86_64), libPushPath, time.Now())
+		err = s.dev.Push(bytes.NewReader(lib86_64), libPushPath, time.Now())
 	}
-	err = s.dev.ReverseLocalAbstract(perfSockNamePre+fmt.Sprintf("_%d", randomInt), s.localPort)
+	//err = s.dev.ReverseLocalAbstract(perfSockNamePre+fmt.Sprintf("_%d", randomInt), s.localPort)
 	if err != nil {
 		panic(err)
 	}
@@ -111,8 +97,6 @@ func (s *PerfTool) Init() {
 		<-s.exitCtx.Done()
 		s.clientStop()
 	}()
-
-	s.startServer()
 
 	s.runBinary(randomInt)
 
@@ -166,64 +150,21 @@ func (s *PerfTool) runBinary(cid int) {
 					log.Error("frame output err,", err)
 					return
 				}
-				log.Debug(string(bytesOutput[:n]))
+				if strings.Contains(string(bytesOutput[:n]), "FPS") {
+					fpsStr := strings.ReplaceAll(string(bytesOutput[:n]), "[perf-tool] INFO: ", "")
+					sysFrame := &entity.SysFrameInfo{}
+					err := json.Unmarshal([]byte(fpsStr), sysFrame)
+					if err != nil {
+						log.Error(err)
+					} else {
+						s.perfFrameDataChan <- sysFrame
+					}
+				}
 			}
 
 		}
 	}()
 	isRelease.Wait()
-}
-
-func (s *PerfTool) startServer() {
-	go func() {
-		var err error
-		s.frameSocket, err = s.perfToolLn.Accept()
-		if err != nil {
-			// todo
-			s.frameSocket = nil
-			s.exitCallBackFunc()
-		}
-
-		s.getFrameSteam()
-	}()
-
-}
-
-func (s *PerfTool) getFrameSteam() {
-	for {
-		select {
-		case <-s.exitCtx.Done():
-			return
-		default:
-			lengthBuffer := make([]byte, 4)
-			n, err1 := s.frameSocket.Read(lengthBuffer)
-			if err1 != nil {
-				// todo
-				s.exitCallBackFunc()
-				break
-			}
-			if n == 0 {
-				continue
-			}
-
-			dataLen := binary.BigEndian.Uint32(lengthBuffer)
-
-			perfDataBuffer := make([]byte, dataLen-4)
-
-			_, err1 = s.frameSocket.Read(perfDataBuffer)
-			if err1 != nil {
-				// todo
-				s.exitCallBackFunc()
-				break
-			}
-			perfData := &entity.SysFrameInfo{}
-			err1 = json.Unmarshal(perfDataBuffer, perfData)
-			if err1 != nil {
-				panic(err1)
-			}
-			s.perfFrameDataChan <- perfData
-		}
-	}
 }
 
 func (s *PerfTool) GetFrame(getBackCall func(frame *entity.SysFrameInfo, code entity.ServerCode)) {
@@ -232,9 +173,6 @@ func (s *PerfTool) GetFrame(getBackCall func(frame *entity.SysFrameInfo, code en
 	go func() {
 		for {
 			<-ticker.C
-			if s.perfToolLn == nil {
-				return
-			}
 			select {
 			case perfData, ok := <-s.perfFrameDataChan:
 				isNoFirst = true
@@ -252,12 +190,4 @@ func (s *PerfTool) GetFrame(getBackCall func(frame *entity.SysFrameInfo, code en
 
 func (s *PerfTool) clientStop() {
 	log.Debugf("close frame tool")
-	if s.perfToolLn != nil {
-		s.perfToolLn.Close()
-		s.perfToolLn = nil
-		s.dev.ReverseKillLocalAbstract(perfSockNamePre)
-	}
-	if s.frameSocket != nil {
-		s.frameSocket.Close()
-	}
 }
