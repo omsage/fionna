@@ -1,21 +1,19 @@
 # Fionna
 
-[English](https://github.com/omsage/fionna/blob/master/README_EN.md )
+[中文](https://github.com/omsage/fionna/blob/master/README.md )
 
-## 概述
+## Overview
 
-fionna是一个针对安卓端的性能采集工具，其功能非常简洁。命名灵感来自于《**冒险时光**》中的Fionna Campbell。
+Fionna is a performance monitoring tool designed for Android devices, with a focus on simplicity. It draws inspiration from Fionna Campbell in "**Adventure Time**".
 
+Key features currently implemented include:
 
-
-当前已实现的主要功能有：
-
-- 解决安卓SurfaceFlinger、GFXInfo这两个方案在游戏等方向上无法采集Frame数据的痛点，具体请参考frame benchmark
-- 其他性能数据，如CPU、Memory、温度、网络......等数据的采集
-- 设备投屏和触控
-- 测试报告
-- 数据导出
-- 数据对比
+- Addressing the limitations of Android's SurfaceFlinger and GFXInfo solutions in capturing frame data for games and similar applications; refer to the frame benchmark for details
+- Monitoring other performance metrics such as CPU, memory, temperature, network, etc.
+- Device screen mirroring and touch input
+- Test reporting
+- Data export
+- Data comparison
 
 **Home**
 
@@ -35,9 +33,9 @@ fionna是一个针对安卓端的性能采集工具，其功能非常简洁。�
 
 ## Frame Benchmark
 
-具体的代码在test/frame_benchmark_test.go中，我在里面定义了三个用于对比的方法：TestFPSBySurfaceFlinger、TestFPSByGFXInfo、TestFPSByFrameTool，分别对应SurfaceFlinger、GFXInfo、新方案工具的获取方式。
+The specific code is in test/frame_benchmark_test.go, where I defined three methods for comparison: TestFPSBySurfaceFlinger, TestFPSByGFXInfo, and TestFPSByFrameTool, corresponding to the ways of obtaining information from SurfaceFlinger, GFXInfo, and the new tool solution, respectively.
 
-测试使用机型为iqoo11s，软件为《白尘禁区》（com.dragonli.projectsnow.lhm），三个方法的获取结果为：
+The testing was conducted on the iqoo11s device, running the software "**Snowbreak: Containment Zone**" (com.dragonli.projectsnow.lhm). The results obtained from the three methods are as follows:
 
 **TestFPSBySurfaceFlinger**
 
@@ -51,114 +49,109 @@ fionna是一个针对安卓端的性能采集工具，其功能非常简洁。�
 
 ![](./doc/TestFPSByOMSageFrameTool.png)
 
-可以看到，使用OMSage Frame Tool工具获取Frame的性能数据有更好的兼容性，基本上能适用安卓大部分场景下的Frame性能采集场景。
+You can see that using the OMSage Frame Tool to obtain performance data for Frames has better compatibility, making it suitable for most Android scenarios involving Frame performance collection.
 
-**OMSage Frame Tool的使用请参考具体代码，并严格按照其代码逻辑使用，二开过程中出现的任何问题，不予解答。**
+**Please refer to the specific code for the usage of the OMSage Frame Tool and strictly follow its code logic. Any issues encountered during customization will not be addressed.**
 
-## 使用
+## Usage
 
-### 快速使用
+### Quickstart
 
-通过Release下载对应的构建产物，解压后直接执行对应的目标程序即可
+Download the corresponding build artifact from Releases, and execute the corresponding target program after decompression.
 
-命令行中直接执行：
+Execute directly in the command line:
 
 ```
 fionna
 ```
 
-之后浏览器访问对应的地址： http://127.0.0.1:3417 
+Then access the corresponding address in the browser: [http://127.0.0.1:3417](http://127.0.0.1:3417/)
 
-### 命令行模式
+### Command Line Mode
 
-fionna内置简单的命令行模式，可以输入以下命令查看说明：
+Fionna has a built-in simple command line mode, and you can input the following command to view instructions:
 
 ```
 fionna --help
 ```
 
-主要有两个模式：
+There are mainly two modes:
 
-#### web模式
+#### web mode
 
-在命令行中直接执行以下命令，程序会直接开启一个web服务，之后可以访问对应的地址：http://127.0.0.1:3417 
+Execute the following command directly in the command line, and the program will directly start a web service. Then you can access the corresponding address: [http://127.0.0.1:3417](http://127.0.0.1:3417/)
 
 ```
 fionna web
 ```
 
-当然，在web模式下，也可以指定使用的SQLite DB文件：
+Of course, in web mode, you can also specify the SQLite DB file to use.
 
 ```
 fionna web -d <db path>
-# 参考示例:fionna fionna web -d ./exapmle/my.db
+# Example:fionna fionna web -d ./exapmle/my.db
 ```
 
-#### cli-perf模式
+#### cli-perf mode
 
-由于web的依赖性太强，所以提供一个简单的性能输出模式，输入以下命令，即可在命令行中得到对应的性能数据：
+Due to the strong dependency of web, a simple performance output mode is provided. Input the following command and you can get the corresponding performance data in the command line:
 
 ```
 fionna cli-perf [flags]
-#参考示例:fionna cli-perf --fps
+# Example:fionna cli-perf --fps
 ```
 
-**可选参数**
+**flags**
 
-| 快捷使用 | 选项名         | 参数类型 | 描述信息                     |
-| -------- | -------------- | -------- | ---------------------------- |
-| -h       | --help         |          | 获取帮助指南                 |
-| -p       | --package      | string   | 应用包名                     |
-| -d       | --pid          | int      | 应用PID (默认 -1)            |
-|          | --proc-cpu     |          | 获取进程cpu数据              |
-|          | --fps          |          | 获取系统FPS                  |
-|          | --jank         |          | 获取系统jank信息             |
-|          | --proc-mem     |          | 获取进程内存数据             |
-|          | --proc-threads |          | 获取进程线程数量             |
-| -s       | --serial       | string   | 设备序列号（默认第一个设备） |
-|          | --sys-cpu      |          | 获取系统cpu数据              |
-|          | --sys-mem      |          | 获取系统内存数据             |
-|          | --sys-network  |          | 获取系统网络数据             |
+| Quick Usage | Option         | Parameter Type | Description                  |
+| ----------- | -------------- | -------------- | ---------------------------- |
+| -h          | --help         |                | Get help guide               |
+| -p          | --package      | string         | Application package name     |
+| -d          | --pid          | int            | Application PID (default -1) |
+|             | --proc-cpu     |                | Get process CPU data         |
+|             | --fps          |                | Get system FPS               |
+|             | --jank         |                | Get system jank information  |
+|             | --proc-mem     |                | Get process memory data      |
+|             | --proc-threads |                | Get process thread count     |
+| -s          | --serial       | string         | Device serial number         |
+|             | --sys-cpu      |                | Get system CPU data          |
+|             | --sys-mem      |                | Get system memory data       |
+|             | --sys-network  |                | Get system network data      |
 
-## 开发
+## Development
 
-**二开本项目请遵守AGPL协议！！！！！！**
+**When customizing this project, please adhere to the AGPL license!!!!**
 
-**二开本项目请遵守AGPL协议！！！！！！**
+**This project embeds a simple Vue frontend, so frontend setup must be done before development. If you need to customize development, follow the steps below first:**
 
-**二开本项目请遵守AGPL协议！！！！！！**
-
-
-
-**本项目嵌入了一个简单的vue前端，所以开发前必须先进行前端的设置。如果需要自定义开发，请先按照以下步骤操作**
-
-- 拉取项目后，首先进入到fionna-web目录
+- After cloning the project, navigate to the fionna-web directory
 
 ```
 cd fionna-web
 ```
 
-- 拉取前端依赖
+- Install frontend dependencies
 
 ```
 npm install
 ```
 
-- 生成构建产物
+- Generate build artifacts
 
 ```
 npm run build
 ```
 
-接下来即可正常根据需求开发项目
+You can now proceed with project development according to your requirements.
 
-## 注意事项
+## Notes
 
-- PC上必须有adb环境
-- 应用的CPU计算和常规的计算有所不同，项目使用的指标为：https://blog.csdn.net/weixin_39451323/article/details/118083713
-- 避免占用3417端口 
+- ADB environment is required on the PC
+- Application's CPU computation differs from regular calculations; the project uses the following metrics:https://blog.csdn.net/weixin_39451323/article/details/118083713
 
-## 感谢
+- Avoid occupying port 3417.
+
+## Thank
 
 - https://github.com/SonicCloudOrg/sonic-android-supply
 - https://github.com/SonicCloudOrg/sonic-client-web

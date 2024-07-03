@@ -97,7 +97,7 @@ func (s *PerfTool) Init() {
 		s.dev.Push(bytes.NewReader(libArm64), libPushPath, time.Now())
 	} else if strings.Contains(abi, "armeabi-v7a") {
 		s.dev.Push(bytes.NewReader(libArm32), libPushPath, time.Now())
-	} else if strings.Contains(abi, "x86") {
+	} else if strings.Contains(abi, "x86_64") {
 		s.dev.Push(bytes.NewReader(lib86), libPushPath, time.Now())
 	} else {
 		s.dev.Push(bytes.NewReader(lib86_64), libPushPath, time.Now())
