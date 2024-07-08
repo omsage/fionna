@@ -97,7 +97,7 @@ func GroupReportUrl(r *gin.Engine) {
 
 	reportUrlGroup.POST("/delete", func(c *gin.Context) {
 		// 只要传一个uuid的json数组就行了
-		infos := []entity.SerialInfo{}
+		infos := []string{}
 
 		if err := c.ShouldBindJSON(&infos); err != nil {
 			// 如果解析失败，则返回错误响应
@@ -111,50 +111,50 @@ func GroupReportUrl(r *gin.Engine) {
 		// 可以组合成一数组的对应model删除，但是太麻烦。。。。
 		for _, info := range infos {
 			var perfConfig entity.PerfConfig
-			db.First(&perfConfig, "uuid = ?", info.UUID)
+			db.First(&perfConfig, "uuid = ?", info)
 
 			if perfConfig.FPS || perfConfig.Jank {
-				db.Delete(&entity.SysFrameInfo{UUID: info.UUID})
-				db.Delete(&entity.FrameSummary{UUID: info.UUID})
+				db.Delete(&entity.SysFrameInfo{UUID: info})
+				db.Delete(&entity.FrameSummary{UUID: info})
 			}
 
 			if perfConfig.SysCpu {
-				db.Delete(&entity.SystemCPUInfo{UUID: info.UUID})
-				db.Delete(&entity.SystemCPUSummary{UUID: info.UUID})
+				db.Delete(&entity.SystemCPUInfo{UUID: info})
+				db.Delete(&entity.SystemCPUSummary{UUID: info})
 			}
 
 			if perfConfig.SysMem {
-				db.Delete(&entity.SystemMemInfo{UUID: info.UUID})
-				db.Delete(&entity.SystemMemSummary{UUID: info.UUID})
+				db.Delete(&entity.SystemMemInfo{UUID: info})
+				db.Delete(&entity.SystemMemSummary{UUID: info})
 			}
 
 			if perfConfig.SysTemperature {
-				db.Delete(&entity.SystemTemperatureSummary{UUID: info.UUID})
-				db.Delete(&entity.SysTemperature{UUID: info.UUID})
+				db.Delete(&entity.SystemTemperatureSummary{UUID: info})
+				db.Delete(&entity.SysTemperature{UUID: info})
 			}
 
 			if perfConfig.SysNetwork {
-				db.Delete(&entity.SystemNetworkInfo{UUID: info.UUID})
-				db.Delete(&entity.SystemNetworkSummary{UUID: info.UUID})
+				db.Delete(&entity.SystemNetworkInfo{UUID: info})
+				db.Delete(&entity.SystemNetworkSummary{UUID: info})
 			}
 
 			if perfConfig.ProcCpu {
-				db.Delete(&entity.ProcCpuInfo{UUID: info.UUID})
-				db.Delete(&entity.ProcCpuSummary{UUID: info.UUID})
+				db.Delete(&entity.ProcCpuInfo{UUID: info})
+				db.Delete(&entity.ProcCpuSummary{UUID: info})
 			}
 
 			if perfConfig.ProcMem {
-				db.Delete(&entity.ProcMemInfo{UUID: info.UUID})
-				db.Delete(&entity.ProcMemSummary{UUID: info.UUID})
+				db.Delete(&entity.ProcMemInfo{UUID: info})
+				db.Delete(&entity.ProcMemSummary{UUID: info})
 			}
 
 			if perfConfig.ProcThread {
-				db.Delete(&entity.ProcThreadsInfo{UUID: info.UUID})
+				db.Delete(&entity.ProcThreadsInfo{UUID: info})
 			}
 
 			db.Delete(perfConfig)
 
-			db.Delete(&entity.SerialInfo{UUID: info.UUID})
+			db.Delete(&entity.SerialInfo{UUID: info})
 		}
 
 	})
