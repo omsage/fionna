@@ -165,7 +165,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 					}
 					sysCpuDataSummary(systemCPUOverview, value, count)
 
-					go func() {
+					go func(value *entity.SystemCPUInfo) {
 
 						db.Create(value)
 						if count == 0 {
@@ -174,7 +174,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 							db.Save(systemCPUOverview)
 						}
 
-					}()
+					}(value)
 				}
 				count++
 				lock.Unlock()
@@ -233,38 +233,38 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 			var lock sync.Mutex
 			perf.GetSysNetwork(device, config, func(sysNet map[string]*entity.SystemNetworkInfo, code entity.ServerCode) {
 				lock.Lock()
-				for name, value := range sysNet {
+				for name, netV := range sysNet {
 
 					if count == 0 {
-						sysNetInit[value.InterfaceName] = &entity.SystemNetworkInfo{
-							Rx: value.Rx,
-							Tx: value.Tx,
+						sysNetInit[netV.InterfaceName] = &entity.SystemNetworkInfo{
+							Rx: netV.Rx,
+							Tx: netV.Tx,
 						}
-						sysNetOverviews[value.InterfaceName] = entity.NewSystemNetworkSummary(config.UUID, name)
+						sysNetOverviews[netV.InterfaceName] = entity.NewSystemNetworkSummary(config.UUID, name)
 					}
 
-					initNetwork := sysNetInit[value.InterfaceName]
-					value.UUID = config.UUID
-					value.Rx = value.Rx - initNetwork.Rx
-					value.Tx = value.Tx - initNetwork.Tx
+					initNetwork := sysNetInit[netV.InterfaceName]
+					netV.UUID = config.UUID
+					netV.Rx = netV.Rx - initNetwork.Rx
+					netV.Tx = netV.Tx - initNetwork.Tx
 
 					sysNetOverview := sysNetOverviews[name]
 
-					//if strings.Contains(value.InterfaceName, "wlan") {
+					//if strings.Contains(netV.InterfaceName, "wlan") {
 
-					sysNetOverview.AllSysTxData += value.Tx
-					sysNetOverview.AllSysRxData += value.Rx
+					sysNetOverview.AllSysTxData += netV.Tx
+					sysNetOverview.AllSysRxData += netV.Rx
 
-					go func() {
+					go func(netV *entity.SystemNetworkInfo) {
 
-						db.Create(value)
+						db.Create(netV)
 						if count == 0 {
 							db.Create(sysNetOverview)
 						} else {
 							db.Save(sysNetOverview)
 						}
 
-					}()
+					}(netV)
 
 				}
 				count++
