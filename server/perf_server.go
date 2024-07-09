@@ -165,9 +165,9 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 					}
 					sysCpuDataSummary(systemCPUOverview, value, count)
 
-					go func(value *entity.SystemCPUInfo) {
+					go func(v *entity.SystemCPUInfo) {
 
-						db.Create(value)
+						db.Create(v)
 						if count == 0 {
 							db.Create(systemCPUOverview)
 						} else {
