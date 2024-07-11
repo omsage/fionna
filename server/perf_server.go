@@ -165,16 +165,16 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 					}
 					sysCpuDataSummary(systemCPUOverview, value, count)
 
-					go func(value *entity.SystemCPUInfo) {
+					go func(v entity.SystemCPUInfo) {
 
-						db.Create(value)
+						db.Create(&v)
 						if count == 0 {
 							db.Create(systemCPUOverview)
 						} else {
 							db.Save(systemCPUOverview)
 						}
 
-					}(value)
+					}(*value)
 				}
 				count++
 				lock.Unlock()
@@ -255,16 +255,16 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 					sysNetOverview.AllSysTxData += netV.Tx
 					sysNetOverview.AllSysRxData += netV.Rx
 
-					go func(netV *entity.SystemNetworkInfo) {
+					go func(netV entity.SystemNetworkInfo) {
 
-						db.Create(netV)
+						db.Create(&netV)
 						if count == 0 {
 							db.Create(sysNetOverview)
 						} else {
 							db.Save(sysNetOverview)
 						}
 
-					}(netV)
+					}(*netV)
 
 				}
 				count++
