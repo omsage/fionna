@@ -7,10 +7,22 @@ import (
 	"fionna/entity"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 func WebSocketScrcpy(r *gin.Engine) {
 	r.GET("/android/scrcpy", func(c *gin.Context) {
+
+		pic := c.Query("pic")
+		if pic == "" {
+			log.Error("pic is empty")
+			c.JSON(http.StatusOK, entity.ResponseData{
+				Data: "pic is empty",
+				Code: entity.ParameterErr,
+			})
+			return
+		}
+
 		ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
 			log.Print("Error during connection upgradation:", err)
@@ -36,7 +48,7 @@ func WebSocketScrcpy(r *gin.Engine) {
 
 		scrcpyClient := scrcpy_client.NewScrcpy(dev, exitCtx, ws)
 
-		scrcpyClient.Start()
+		scrcpyClient.Start(entity.ScrcpyPic(pic))
 
 		var message entity.ScrcpyRecvMessage
 
@@ -57,6 +69,7 @@ func WebSocketScrcpy(r *gin.Engine) {
 						log.Error("read message steam err:", err)
 						ws.WriteJSON(entity.NewScrcpyError("read message steam err:" + err.Error()))
 						scrcpyClient.ClientStop()
+						return
 					} else {
 						if message.MessageType == entity.ScrcpyCloseType {
 							scrcpyClient.ClientStop()
@@ -64,6 +77,12 @@ func WebSocketScrcpy(r *gin.Engine) {
 						if message.MessageType == entity.ScrcpyPongType {
 							continue
 						}
+						//if message.MessageType == entity.ScrcpyPicType {
+						//	if pic, ok := message.Data.(entity.ScrcpyPic); ok {
+						//		scrcpyClient.ClientStop()
+						//		scrcpyClient.Start(pic)
+						//	}
+						//}
 					}
 				}
 			}

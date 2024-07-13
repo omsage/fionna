@@ -3,7 +3,6 @@ package scrcpy_client
 import (
 	"bytes"
 	"encoding/binary"
-	"fionna/entity"
 	log "github.com/sirupsen/logrus"
 	"net"
 )
@@ -53,31 +52,32 @@ func (c *Control) Text(text string) error {
 	}
 	return nil
 }
-func (c *Control) Touch(touch *entity.ScrcpyTouch, touchID int) error {
-	var data = []interface{}{
-		uint8(TypeInjectTOUCHEvent), // base       1
-		uint8(touch.ActionType),     // B 1 byte   2
-		int64(touchID),              // q 8 byte   10
-		uint32(touch.X),             // i 4 byte   14
-		uint32(touch.Y),             // i 4 byte   18
-		uint16(touch.Width),         // H 2 byte   20
-		uint16(touch.Height),        // H 2 byte   22
-		uint16(0xffff),              // H 2 byte   24
-		uint32(1),                   // i 4 byte   28
-		uint32(1),                   // i 4 byte   32
-	}
-	msg, err := serializePack(data)
-	if err != nil {
-		log.Error("control serialize touch packet err", err)
-		return err
-	}
-	_, err = c.controlConn.Write(msg)
-	if err != nil {
-		log.Error("control send touch packet err", err)
-		return err
-	}
-	return nil
-}
+
+//func (c *Control) Touch(touch *entity.ScrcpyTouch, touchID int) error {
+//	var data = []interface{}{
+//		uint8(TypeInjectTOUCHEvent), // base       1
+//		uint8(touch.ActionType),     // B 1 byte   2
+//		int64(touchID),              // q 8 byte   10
+//		uint32(touch.X),             // i 4 byte   14
+//		uint32(touch.Y),             // i 4 byte   18
+//		uint16(touch.Width),         // H 2 byte   20
+//		uint16(touch.Height),        // H 2 byte   22
+//		uint16(0xffff),              // H 2 byte   24
+//		uint32(1),                   // i 4 byte   28
+//		uint32(1),                   // i 4 byte   32
+//	}
+//	msg, err := serializePack(data)
+//	if err != nil {
+//		log.Error("control serialize touch packet err", err)
+//		return err
+//	}
+//	_, err = c.controlConn.Write(msg)
+//	if err != nil {
+//		log.Error("control send touch packet err", err)
+//		return err
+//	}
+//	return nil
+//}
 
 func serializePack(data []interface{}) ([]byte, error) {
 	buf := new(bytes.Buffer)

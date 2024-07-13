@@ -25,6 +25,7 @@ const (
 )
 
 var (
+	// 来源：https://github.com/aoliaoaoaojiao/scrcpy
 	//go:embed scrcpy-server
 	scrcpyBytes    []byte
 	scrcpyPtrLen   int32
@@ -90,7 +91,7 @@ func NewScrcpy(device *gadb.Device, ctx context.Context, forwardWs *websocket.Co
 	}
 }
 
-func (s *Scrcpy) Start() {
+func (s *Scrcpy) Start(pic entity.ScrcpyPic) {
 	// todo
 	var err error
 	err = s.dev.Push(bytes.NewReader(scrcpyBytes), deviceServerPath, time.Now())
@@ -110,14 +111,25 @@ func (s *Scrcpy) Start() {
 
 	s.startServer()
 
-	s.runBinary()
+	s.runBinary(pic)
 
 }
 
-func (s *Scrcpy) runBinary() {
+func (s *Scrcpy) runBinary(pic entity.ScrcpyPic) {
 	var output io.Reader
 
-	output, err := s.dev.RunShellLoopCommand(fmt.Sprintf("CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server v2.2  log_level=debug max_size=0 max_fps=60 control=false  audio=false audio=false size_info=true"))
+	var maxSize int
+
+	switch pic {
+	case entity.ScrcpyPicLow:
+		maxSize = 640
+	case entity.ScrcpyPicMid:
+		maxSize = 1280
+	case entity.ScrcpyPicHeight:
+		maxSize = 1920
+	}
+
+	output, err := s.dev.RunShellLoopCommand(fmt.Sprintf("CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server v2.2  log_level=debug max_size=0 max_fps=60 control=false max_size=%d audio=false audio=false size_info=true", maxSize))
 	if err != nil {
 		log.Error("execute scrcpy err:", err)
 		s.exitCallBackFunc()

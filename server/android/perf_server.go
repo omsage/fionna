@@ -551,3 +551,55 @@ func WebSocketPerf(r *gin.Engine) {
 		}()
 	})
 }
+
+func initPerfAndStart(serialInfo *entity.SerialInfo, perfConfig *entity.PerfConfig, device *gadb.Device, ws *websocket.Conn) {
+	id := uuid.New()
+
+	currentTime := time.Now()
+
+	// 格式化时间为字符串
+	formattedTime := currentTime.Format("2006-01-02 15:04:05")
+
+	var testName = ""
+	var err error
+
+	if perfConfig.PackageName != "" && perfConfig.Pid != "" {
+		testName = fmt.Sprintf("%s_%s_%s_pid%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.PackageName, perfConfig.Pid, formattedTime)
+	} else if perfConfig.PackageName != "" && perfConfig.Pid == "" {
+
+		testName = fmt.Sprintf("%s_%s_%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.PackageName, formattedTime)
+
+		perfConfig.Pid, err = android_util.GetPidOnPackageName(device, perfConfig.PackageName)
+
+		if err != nil {
+			log.Error("get pid err:", err)
+			ws.WriteJSON(entity.NewPerfDataError("get pid err:" + err.Error()))
+			return
+		}
+	} else if perfConfig.PackageName == "" && perfConfig.Pid != "" {
+		testName = fmt.Sprintf("%s_%s_pid%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.Pid, formattedTime)
+	} else {
+		testName = fmt.Sprintf("%s_%s_%s", serialInfo.ProductDevice, serialInfo.Model, formattedTime)
+	}
+
+	serialInfo.TestName = &testName
+	timestamp := time.Now().UnixMilli()
+
+	serialInfo.Timestamp = &timestamp
+	serialInfo.PackageName = &perfConfig.PackageName
+
+	if serialInfo.UUID == "" {
+		serialInfo.UUID = id.String()
+	}
+
+	db.GetDB().Create(serialInfo)
+
+	if perfConfig.IntervalTime == 0 {
+		perfConfig.IntervalTime = 1
+	}
+
+	perfConfig.UUID = id.String()
+	db.GetDB().Create(perfConfig)
+
+	startGetPerf(ws, device, *perfConfig)
+}

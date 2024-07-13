@@ -9,28 +9,37 @@ const (
 	ScrcpyPongType     ScrcpyRecvMessageType = "pong"
 	ScrcpyDeviceType   ScrcpyRecvMessageType = "device"
 	ScrcpySizeInfoType ScrcpySendMessageType = "sizeInfo"
+	ScrcpyPicType      ScrcpyRecvMessageType = "pic"
 	ScrcpyErrorType    ScrcpySendMessageType = "error"
+)
+
+type ScrcpyPic string
+
+const (
+	ScrcpyPicLow    ScrcpyPic = "low"
+	ScrcpyPicMid    ScrcpyPic = "mid"
+	ScrcpyPicHeight ScrcpyPic = "height"
 )
 
 type ScrcpyDevice struct {
 	UDID string `json:"udid"`
 }
 
-type ScrcpyTouch struct {
-	ActionType ActionType `json:"actionType"`
-	X          int        `json:"x"`
-	Y          int        `json:"y"`
-	Width      int        `json:"width"`
-	Height     int        `json:"height"`
-}
-
-type ActionType int
-
-const (
-	ActionDown ActionType = 0
-	ActionUp   ActionType = 1
-	ActionMove ActionType = 2
-)
+//type ScrcpyTouch struct {
+//	ActionType ActionType `json:"actionType"`
+//	X          int        `json:"x"`
+//	Y          int        `json:"y"`
+//	Width      int        `json:"width"`
+//	Height     int        `json:"height"`
+//}
+//
+//type ActionType int
+//
+//const (
+//	ActionDown ActionType = 0
+//	ActionUp   ActionType = 1
+//	ActionMove ActionType = 2
+//)
 
 type ScrcpySizeInfo struct {
 	Rotation int `json:"rotation"`

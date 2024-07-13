@@ -93,7 +93,7 @@ func AndroidServerInit(r *gin.Engine) {
 	android.GroupAndroidSerialUrl(r)
 	android.GroupAndroidPackageUrl(r)
 	android.WebSocketScrcpy(r)
-	android.WebSocketPerf(r)
+	//android.WebSocketPerf(r)
 	android.WebSocketTerminal(r)
-	android.Android_Control(r)
+	android.AndroidControl(r)
 }

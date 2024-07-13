@@ -2,20 +2,22 @@ package entity
 
 import "context"
 
-type PerfRecvMessageType string
-type PerfSendMessageType string
+type ControlRecvMessageType string
+type ControlSendMessageType string
 
 const (
-	StartPerfType PerfRecvMessageType = "startPerfmon"
-	ClosePerfType PerfRecvMessageType = "closePerfmon"
-	PongPerfType  PerfRecvMessageType = "pongPerfmon"
-	PerfDataType  PerfSendMessageType = "perfdata"
-	PerfErrorType PerfSendMessageType = "error"
+	ControlTouchType ControlRecvMessageType = "touch"
+	StartPerfType    ControlRecvMessageType = "startPerfmon"
+	ClosePerfType    ControlRecvMessageType = "closePerfmon"
+	PongPerfType     ControlRecvMessageType = "pongPerfmon"
+	PerfDataType     ControlSendMessageType = "perfdata"
+	RotationDataType ControlSendMessageType = "rotation"
+	PerfErrorType    ControlSendMessageType = "perfError"
 )
 
 type PerfRecvMessage struct {
-	MessageType PerfRecvMessageType `json:"messageType"`
-	Data        interface{}         `json:"data"`
+	MessageType ControlRecvMessageType `json:"messageType"`
+	Data        interface{}            `json:"data"`
 }
 
 type PerfData struct {
@@ -31,8 +33,8 @@ func NewPerfDataMessage(PerfData *PerfData) *PerfDataMessage {
 }
 
 type PerfDataMessage struct {
-	MessageType PerfSendMessageType `json:"messageType"`
-	Data        interface{}         `json:"perfData"`
+	MessageType ControlSendMessageType `json:"messageType"`
+	Data        interface{}            `json:"perfData"`
 }
 
 func NewPerfDataError(message string) *PerfErrorMessage {
@@ -43,8 +45,8 @@ func NewPerfDataError(message string) *PerfErrorMessage {
 }
 
 type PerfErrorMessage struct {
-	MessageType PerfSendMessageType `json:"messageType"`
-	ErrorInfo   string              `json:"errorInfo"`
+	MessageType ControlSendMessageType `json:"messageType"`
+	ErrorInfo   string                 `json:"errorInfo"`
 }
 
 type PerfConfig struct {
