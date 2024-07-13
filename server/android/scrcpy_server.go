@@ -2,7 +2,6 @@ package android
 
 import (
 	"context"
-	"encoding/json"
 	"fionna/android/android_util"
 	"fionna/android/scrcpy_client"
 	"fionna/entity"
@@ -59,28 +58,6 @@ func WebSocketScrcpy(r *gin.Engine) {
 						ws.WriteJSON(entity.NewScrcpyError("read message steam err:" + err.Error()))
 						scrcpyClient.ClientStop()
 					} else {
-						if message.MessageType == entity.ScrcpyTouchType {
-							data, err1 := json.Marshal(message.Data)
-							if err1 != nil {
-								log.Error("the data sent is not json")
-								ws.WriteJSON(entity.NewScrcpyError("the data sent is not json"))
-								break
-							}
-							var touch = &entity.ScrcpyTouch{}
-							err1 = json.Unmarshal(data, touch)
-							if err1 == nil {
-								err = scrcpyClient.Touch(touch, 1)
-								if err != nil {
-									log.Error("execute touch err:", err)
-									ws.WriteJSON(entity.NewScrcpyError("execute touch err:" + err.Error()))
-									break
-								}
-							} else {
-								log.Error("conversion message error,", err1)
-								ws.WriteJSON(entity.NewScrcpyError("conversion message error," + err1.Error()))
-								break
-							}
-						}
 						if message.MessageType == entity.ScrcpyCloseType {
 							scrcpyClient.ClientStop()
 						}

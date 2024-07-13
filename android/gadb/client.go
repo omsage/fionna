@@ -94,7 +94,7 @@ func (c Client) DeviceList() (devices []Device, err error) {
 		mapAttrs := map[string]string{}
 		for _, field := range sliceAttrs {
 			split := strings.Split(field, ":")
-			if len(split) > 2 {
+			if len(split) >= 2 {
 				key, val := split[0], split[1]
 				mapAttrs[key] = val
 			}

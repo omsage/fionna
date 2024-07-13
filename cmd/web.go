@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"embed"
 	"fionna/server"
 	"github.com/spf13/cobra"
 )
@@ -11,15 +10,8 @@ func runWeb() {
 }
 
 var (
-	dist      embed.FS
-	indexHtml []byte
-	dbName    string
+	dbName string
 )
-
-//func SetEmbed(distParam embed.FS, indexHtmlParam []byte) {
-//	dist = distParam
-//	indexHtml = indexHtmlParam
-//}
 
 var webCmd = &cobra.Command{
 	Use:   "web",

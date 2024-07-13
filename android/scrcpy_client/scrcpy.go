@@ -50,13 +50,13 @@ func RestoreScrcpyPtr(ptr int32) *Scrcpy {
 }
 
 type Scrcpy struct {
-	dev              *gadb.Device
-	localPort        int
-	isSendH246       bool
-	scrcpyLn         net.Listener
-	scrcpyControl    *Control
-	videoSocket      net.Conn
-	controlSocket    net.Conn
+	dev        *gadb.Device
+	localPort  int
+	isSendH246 bool
+	scrcpyLn   net.Listener
+	//scrcpyControl    *Control
+	videoSocket net.Conn
+	//controlSocket    net.Conn
 	sizeInfoSocket   net.Conn
 	lock             sync.Mutex
 	forwardWs        *websocket.Conn
@@ -117,7 +117,7 @@ func (s *Scrcpy) Start() {
 func (s *Scrcpy) runBinary() {
 	var output io.Reader
 
-	output, err := s.dev.RunShellLoopCommand(fmt.Sprintf("CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server v2.2  log_level=debug max_size=0 max_fps=60 audio=false audio=false size_info=true"))
+	output, err := s.dev.RunShellLoopCommand(fmt.Sprintf("CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server v2.2  log_level=debug max_size=0 max_fps=60 control=false  audio=false audio=false size_info=true"))
 	if err != nil {
 		log.Error("execute scrcpy err:", err)
 		s.exitCallBackFunc()
@@ -180,8 +180,8 @@ func (s *Scrcpy) startServer() {
 			s.videoParse()
 		}()
 
-		s.controlSocket, err = s.scrcpyLn.Accept()
-		s.scrcpyControl = NewControl(s.controlSocket)
+		//s.controlSocket, err = s.scrcpyLn.Accept()
+		//s.scrcpyControl = NewControl(s.controlSocket)
 		if err != nil {
 			log.Error("get scrcpy control socket err,", err)
 			return
@@ -339,19 +339,19 @@ func (s *Scrcpy) clientStop() {
 		s.videoSocket = nil
 		//s.frameStop()
 	}
-	if s.controlSocket != nil {
-		s.controlSocket.Close()
-		s.controlSocket = nil
-	}
+	//if s.controlSocket != nil {
+	//	s.controlSocket.Close()
+	//	s.controlSocket = nil
+	//}
 	if s.forwardWs != nil {
 		s.forwardWs.Close()
 		s.forwardWs = nil
 	}
 }
 
-func (s *Scrcpy) Touch(touch *entity.ScrcpyTouch, touchID int) error {
-	return s.scrcpyControl.Touch(touch, touchID)
-}
+//func (s *Scrcpy) Touch(touch *entity.ScrcpyTouch, touchID int) error {
+//	return s.scrcpyControl.Touch(touch, touchID)
+//}
 
 func (s *Scrcpy) GetDevice() *gadb.Device {
 	return s.dev

@@ -9,8 +9,8 @@ const (
 )
 
 type TouchInfo struct {
-	X         float32
-	Y         float32
-	TouchType TouchType
-	FingerID  int
+	X         float32   `json:"x"`
+	Y         float32   `json:"y"`
+	TouchType TouchType `json:"touchType"`
+	FingerID  int       `json:"fingerID"`
 }
