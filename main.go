@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fionna/cmd"
+	"fionna/server"
 )
 
 //go:embed fionna-web/dist/* fionna-web/dist/assets/*
@@ -12,6 +13,6 @@ var dist embed.FS
 var indexHtml []byte
 
 func main() {
-	cmd.SetEmbed(dist, indexHtml)
+	server.SetEmbed(dist, indexHtml)
 	cmd.Execute()
 }

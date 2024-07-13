@@ -1,10 +1,11 @@
-package server
+package android
 
 import (
 	"context"
 	"encoding/json"
 	"fionna/android/android_util"
 	"fionna/entity"
+	"fionna/server/util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
@@ -64,7 +65,7 @@ func WebSocketTerminal(r *gin.Engine) {
 			return
 		}
 
-		ws := NewSafeWebsocket(terminalWs)
+		ws := util.NewSafeWebsocket(terminalWs)
 
 		exitCtx, exitFn := context.WithCancel(context.Background())
 

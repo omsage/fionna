@@ -2,6 +2,8 @@ package server
 
 import (
 	"fionna/entity"
+	"fionna/server/db"
+	"fionna/server/util"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
@@ -9,13 +11,13 @@ import (
 	"net/url"
 )
 
-func GetReportInfoByPage(p *Pagination, name string) (reportList []entity.SerialInfo, err error) {
-	err = db.Model(&entity.SerialInfo{}).Where("test_name like ?", "%"+name+"%").Order("created_at desc").Scopes(p.GormPaginate()).Find(&reportList).Error
+func GetReportInfoByPage(p *util.Pagination, name string) (reportList []entity.SerialInfo, err error) {
+	err = db.GetDB().Model(&entity.SerialInfo{}).Where("test_name like ?", "%"+name+"%").Order("created_at desc").Scopes(p.GormPaginate()).Find(&reportList).Error
 	if err != nil {
 		return nil, err
 	}
 	var total int64
-	db.Model(&entity.SerialInfo{}).Count(&total)
+	db.GetDB().Model(&entity.SerialInfo{}).Count(&total)
 	p.Total = cast.ToInt(total)
 	return
 }
@@ -27,7 +29,7 @@ func GroupReportUrl(r *gin.Engine) {
 
 		name := c.Query("name")
 
-		p := NewPagination(c)
+		p := util.NewPagination(c)
 
 		reportList, err := GetReportInfoByPage(p, name)
 		if err != nil {
@@ -61,7 +63,7 @@ func GroupReportUrl(r *gin.Engine) {
 
 		serialInfo := &entity.SerialInfo{}
 
-		db.First(serialInfo, "uuid = ?", uuid)
+		db.GetDB().First(serialInfo, "uuid = ?", uuid)
 
 		c.Header("Content-Type", "application/vnd.ms-excel;charset=utf8")
 		//设置文件名称
@@ -86,7 +88,7 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		// User 的 ID 是 `111`
-		db.Model(&info).Update("test_name", info.TestName)
+		db.GetDB().Model(&info).Update("test_name", info.TestName)
 
 		c.JSON(http.StatusOK, entity.ResponseData{
 			Data: "rename succeed",
@@ -111,50 +113,50 @@ func GroupReportUrl(r *gin.Engine) {
 		// 可以组合成一数组的对应model删除，但是太麻烦。。。。
 		for _, info := range infos {
 			var perfConfig entity.PerfConfig
-			db.First(&perfConfig, "uuid = ?", info)
+			db.GetDB().First(&perfConfig, "uuid = ?", info)
 
 			if perfConfig.FPS || perfConfig.Jank {
-				db.Delete(&entity.SysFrameInfo{UUID: info})
-				db.Delete(&entity.FrameSummary{UUID: info})
+				db.GetDB().Delete(&entity.SysFrameInfo{UUID: info})
+				db.GetDB().Delete(&entity.FrameSummary{UUID: info})
 			}
 
 			if perfConfig.SysCpu {
-				db.Delete(&entity.SystemCPUInfo{UUID: info})
-				db.Delete(&entity.SystemCPUSummary{UUID: info})
+				db.GetDB().Delete(&entity.SystemCPUInfo{UUID: info})
+				db.GetDB().Delete(&entity.SystemCPUSummary{UUID: info})
 			}
 
 			if perfConfig.SysMem {
-				db.Delete(&entity.SystemMemInfo{UUID: info})
-				db.Delete(&entity.SystemMemSummary{UUID: info})
+				db.GetDB().Delete(&entity.SystemMemInfo{UUID: info})
+				db.GetDB().Delete(&entity.SystemMemSummary{UUID: info})
 			}
 
 			if perfConfig.SysTemperature {
-				db.Delete(&entity.SystemTemperatureSummary{UUID: info})
-				db.Delete(&entity.SysTemperature{UUID: info})
+				db.GetDB().Delete(&entity.SystemTemperatureSummary{UUID: info})
+				db.GetDB().Delete(&entity.SysTemperature{UUID: info})
 			}
 
 			if perfConfig.SysNetwork {
-				db.Delete(&entity.SystemNetworkInfo{UUID: info})
-				db.Delete(&entity.SystemNetworkSummary{UUID: info})
+				db.GetDB().Delete(&entity.SystemNetworkInfo{UUID: info})
+				db.GetDB().Delete(&entity.SystemNetworkSummary{UUID: info})
 			}
 
 			if perfConfig.ProcCpu {
-				db.Delete(&entity.ProcCpuInfo{UUID: info})
-				db.Delete(&entity.ProcCpuSummary{UUID: info})
+				db.GetDB().Delete(&entity.ProcCpuInfo{UUID: info})
+				db.GetDB().Delete(&entity.ProcCpuSummary{UUID: info})
 			}
 
 			if perfConfig.ProcMem {
-				db.Delete(&entity.ProcMemInfo{UUID: info})
-				db.Delete(&entity.ProcMemSummary{UUID: info})
+				db.GetDB().Delete(&entity.ProcMemInfo{UUID: info})
+				db.GetDB().Delete(&entity.ProcMemSummary{UUID: info})
 			}
 
 			if perfConfig.ProcThread {
-				db.Delete(&entity.ProcThreadsInfo{UUID: info})
+				db.GetDB().Delete(&entity.ProcThreadsInfo{UUID: info})
 			}
 
-			db.Delete(perfConfig)
+			db.GetDB().Delete(perfConfig)
 
-			db.Delete(&entity.SerialInfo{UUID: info})
+			db.GetDB().Delete(&entity.SerialInfo{UUID: info})
 		}
 
 	})
@@ -172,7 +174,7 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		c.JSON(http.StatusOK, entity.ResponseData{
 			Data: perfConfig,
@@ -193,20 +195,20 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		overallSummary := &entity.OverallSummary{}
 
 		if perfConfig.FPS || perfConfig.Jank {
 			var frameSummary entity.FrameSummary
-			db.First(&frameSummary, "uuid = ?", uuid)
+			db.GetDB().First(&frameSummary, "uuid = ?", uuid)
 			overallSummary.SysFrameSummary = &frameSummary
 		}
 
 		if perfConfig.SysCpu {
 			sysCpuSummary := make(map[string]entity.SystemCPUSummary)
 			var cpuSummarys []entity.SystemCPUSummary
-			db.Where("uuid = ?", uuid).Find(&cpuSummarys)
+			db.GetDB().Where("uuid = ?", uuid).Find(&cpuSummarys)
 			for _, value := range cpuSummarys {
 				sysCpuSummary[value.CpuName] = value
 			}
@@ -216,7 +218,7 @@ func GroupReportUrl(r *gin.Engine) {
 		if perfConfig.SysNetwork {
 			sysNetworkSummary := make(map[string]entity.SystemNetworkSummary)
 			var netSummarys []entity.SystemNetworkSummary
-			db.Where("uuid = ?", uuid).Find(&netSummarys)
+			db.GetDB().Where("uuid = ?", uuid).Find(&netSummarys)
 			for _, value := range netSummarys {
 				sysNetworkSummary[value.Name] = value
 			}
@@ -225,25 +227,25 @@ func GroupReportUrl(r *gin.Engine) {
 
 		if perfConfig.SysMem {
 			var sysMemSummarys entity.SystemMemSummary
-			db.First(&sysMemSummarys, "uuid = ?", uuid)
+			db.GetDB().First(&sysMemSummarys, "uuid = ?", uuid)
 			overallSummary.SysMemSummary = &sysMemSummarys
 		}
 
 		if perfConfig.SysTemperature {
 			var sysTemperature entity.SystemTemperatureSummary
-			db.First(&sysTemperature, "uuid = ?", uuid)
+			db.GetDB().First(&sysTemperature, "uuid = ?", uuid)
 			overallSummary.SysTemperatureSummary = &sysTemperature
 		}
 
 		if perfConfig.ProcCpu {
 			var procCpuSummary entity.ProcCpuSummary
-			db.First(&procCpuSummary, "uuid = ?", uuid)
+			db.GetDB().First(&procCpuSummary, "uuid = ?", uuid)
 			overallSummary.ProcCpu = &procCpuSummary
 		}
 
 		if perfConfig.ProcMem {
 			var procMemSummary entity.ProcMemSummary
-			db.First(&procMemSummary, "uuid = ?", uuid)
+			db.GetDB().First(&procMemSummary, "uuid = ?", uuid)
 			overallSummary.ProcMem = &procMemSummary
 		}
 
@@ -266,11 +268,11 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.ProcCpu {
 			var procCpuDatas []entity.ProcCpuInfo
-			db.Order("timestamp asc").Where("uuid = ?", uuid).Find(&procCpuDatas)
+			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&procCpuDatas)
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: procCpuDatas,
 				Code: entity.RequestSucceed,
@@ -296,11 +298,11 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.ProcMem {
 			var procMemDatas []entity.ProcMemInfo
-			db.Order("timestamp asc").Where("uuid = ?", uuid).Find(&procMemDatas)
+			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&procMemDatas)
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: procMemDatas,
 				Code: entity.RequestSucceed,
@@ -326,11 +328,11 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.ProcThread {
 			var procThreadDatas []entity.ProcThreadsInfo
-			db.Order("timestamp asc").Where("uuid = ?", uuid).Find(&procThreadDatas)
+			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&procThreadDatas)
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: procThreadDatas,
 				Code: entity.RequestSucceed,
@@ -356,11 +358,11 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.SysCpu {
 			var sysCpuDatas []entity.SystemCPUInfo
-			db.Order("timestamp asc").Where("uuid = ?", uuid).Find(&sysCpuDatas)
+			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&sysCpuDatas)
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: sysCpuDatas,
 				Code: entity.RequestSucceed,
@@ -386,11 +388,11 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.SysMem {
 			var SYSMemDatas []entity.SystemMemInfo
-			db.Order("timestamp asc").Where("uuid = ?", uuid).Find(&SYSMemDatas)
+			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&SYSMemDatas)
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: SYSMemDatas,
 				Code: entity.RequestSucceed,
@@ -416,11 +418,11 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.FPS || perfConfig.Jank {
 			var sysFrameDatas []entity.SysFrameInfo
-			db.Order("timestamp asc").Where("uuid = ?", uuid).Find(&sysFrameDatas)
+			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&sysFrameDatas)
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: sysFrameDatas,
 				Code: entity.RequestSucceed,
@@ -446,11 +448,11 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.SysNetwork {
 			var SysNetworkDatas []entity.SystemNetworkInfo
-			db.Order("timestamp asc").Where("uuid = ?", uuid).Find(&SysNetworkDatas)
+			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&SysNetworkDatas)
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: SysNetworkDatas,
 				Code: entity.RequestSucceed,
@@ -476,11 +478,11 @@ func GroupReportUrl(r *gin.Engine) {
 		}
 
 		var perfConfig entity.PerfConfig
-		db.First(&perfConfig, "uuid = ?", uuid)
+		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.SysNetwork {
 			var sysTemperatureDatas []entity.SysTemperature
-			db.Order("timestamp asc").Where("uuid = ?", uuid).Find(&sysTemperatureDatas)
+			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&sysTemperatureDatas)
 			c.JSON(http.StatusOK, entity.ResponseData{
 				Data: sysTemperatureDatas,
 				Code: entity.RequestSucceed,

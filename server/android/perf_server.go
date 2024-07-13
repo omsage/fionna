@@ -1,4 +1,4 @@
-package server
+package android
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"fionna/android/gadb"
 	"fionna/android/perf"
 	"fionna/entity"
+	"fionna/server/db"
+	"fionna/server/util"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -94,7 +96,7 @@ func procMemDataSummary(procMemOverview *entity.ProcMemSummary, procMem *entity.
 }
 
 func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity.PerfConfig) {
-	perfConn := NewSafeWebsocket(perfWsConn)
+	perfConn := util.NewSafeWebsocket(perfWsConn)
 	if config.FPS || config.Jank {
 
 		frameOverview := entity.NewFrameSummary(config.UUID)
@@ -123,12 +125,12 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 				go func() {
 
 					if count == 1 {
-						db.Create(frameOverview)
+						db.GetDB().Create(frameOverview)
 					} else {
-						db.Save(frameOverview)
+						db.GetDB().Save(frameOverview)
 					}
 
-					db.Create(sysFrameInfo)
+					db.GetDB().Create(sysFrameInfo)
 
 				}()
 				count++
@@ -167,11 +169,11 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 					go func(v entity.SystemCPUInfo) {
 
-						db.Create(&v)
+						db.GetDB().Create(&v)
 						if count == 0 {
-							db.Create(systemCPUOverview)
+							db.GetDB().Create(systemCPUOverview)
 						} else {
-							db.Save(systemCPUOverview)
+							db.GetDB().Save(systemCPUOverview)
 						}
 
 					}(*value)
@@ -201,11 +203,11 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				go func() {
 
-					db.Create(sysMem)
+					db.GetDB().Create(sysMem)
 					if count == 0 {
-						db.Create(sysMemOverview)
+						db.GetDB().Create(sysMemOverview)
 					} else {
-						db.Save(sysMemOverview)
+						db.GetDB().Save(sysMemOverview)
 					}
 
 				}()
@@ -257,11 +259,11 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 					go func(netV entity.SystemNetworkInfo) {
 
-						db.Create(&netV)
+						db.GetDB().Create(&netV)
 						if count == 0 {
-							db.Create(sysNetOverview)
+							db.GetDB().Create(sysNetOverview)
 						} else {
-							db.Save(sysNetOverview)
+							db.GetDB().Save(sysNetOverview)
 						}
 
 					}(*netV)
@@ -294,11 +296,11 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				go func() {
 
-					db.Create(cpuInfo)
+					db.GetDB().Create(cpuInfo)
 					if count == 0 {
-						db.Create(procCpuOverview)
+						db.GetDB().Create(procCpuOverview)
 					} else {
-						db.Save(procCpuOverview)
+						db.GetDB().Save(procCpuOverview)
 					}
 
 				}()
@@ -333,11 +335,11 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				go func() {
 
-					db.Create(memInfo)
+					db.GetDB().Create(memInfo)
 					if count == 0 {
-						db.Create(procMemOverview)
+						db.GetDB().Create(procMemOverview)
 					} else {
-						db.Save(procMemOverview)
+						db.GetDB().Save(procMemOverview)
 					}
 
 				}()
@@ -360,7 +362,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 			perf.GetProcThreads(device, config, func(threadInfo *entity.ProcThreadsInfo, code entity.ServerCode) {
 				threadInfo.UUID = config.UUID
 				go func() {
-					db.Create(threadInfo)
+					db.GetDB().Create(threadInfo)
 				}()
 
 				perfData := &entity.PerfData{ProcPerfData: &entity.ProcessInfo{ThreadInfo: threadInfo}}
@@ -396,11 +398,11 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 				go func() {
 
-					db.Create(temperatureInfo)
+					db.GetDB().Create(temperatureInfo)
 					if count == 0 {
-						db.Create(sysTemperatureSummary)
+						db.GetDB().Create(sysTemperatureSummary)
 					} else {
-						db.Save(sysTemperatureSummary)
+						db.GetDB().Save(sysTemperatureSummary)
 					}
 
 				}()
@@ -516,7 +518,7 @@ func WebSocketPerf(r *gin.Engine) {
 									serialInfo.UUID = id.String()
 								}
 
-								db.Create(serialInfo)
+								db.GetDB().Create(serialInfo)
 
 								if perfConfig.IntervalTime == 0 {
 									perfConfig.IntervalTime = 1
@@ -526,7 +528,7 @@ func WebSocketPerf(r *gin.Engine) {
 								perfConfig.CancelFn = exitFn
 
 								perfConfig.UUID = id.String()
-								db.Create(perfConfig)
+								db.GetDB().Create(perfConfig)
 
 								startGetPerf(ws, device, *perfConfig)
 

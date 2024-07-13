@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fionna/entity"
 	"fionna/server"
+	"fionna/server/android"
+	"fionna/server/db"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -58,7 +60,7 @@ func simpleTestHttpResults(t *testing.T, resStruct interface{}, rec *httptest.Re
 
 func TestAndroidSerialListUrl(t *testing.T) {
 	r := getGinEngine()
-	server.GroupAndroidSerialUrl(r)
+	android.GroupAndroidSerialUrl(r)
 	req, err := http.NewRequest(http.MethodGet, "/android/serial/list", nil)
 	if err != nil {
 		t.Fatalf("构建请求失败, err: %v", err)
@@ -76,7 +78,7 @@ func TestAndroidSerialListUrl(t *testing.T) {
 
 func TestAndroidDefaultSerialUrl(t *testing.T) {
 	r := getGinEngine()
-	server.GroupAndroidSerialUrl(r)
+	android.GroupAndroidSerialUrl(r)
 	req, err := http.NewRequest(http.MethodGet, "/android/serial/default", nil)
 	if err != nil {
 		t.Fatalf("构建请求失败, err: %v", err)
@@ -94,7 +96,7 @@ func TestAndroidDefaultSerialUrl(t *testing.T) {
 
 func TestAndroidSerialInfoUrl(t *testing.T) {
 	r := getGinEngine()
-	server.GroupAndroidSerialUrl(r)
+	android.GroupAndroidSerialUrl(r)
 	req, err := http.NewRequest(http.MethodGet, "/android/serial/info?udid="+"91cf5f1c", nil)
 	if err != nil {
 		t.Fatalf("构建请求失败, err: %v", err)
@@ -112,7 +114,7 @@ func TestAndroidSerialInfoUrl(t *testing.T) {
 
 func TestAndroidPackageNameList(t *testing.T) {
 	r := getGinEngine()
-	server.GroupAndroidPackageUrl(r)
+	android.GroupAndroidPackageUrl(r)
 
 	params := map[string]string{
 		"udid": "91cf5f1c",
@@ -137,7 +139,7 @@ func TestAndroidPackageNameList(t *testing.T) {
 
 func TestAndroidCurrentPackageName(t *testing.T) {
 	r := getGinEngine()
-	server.GroupAndroidPackageUrl(r)
+	android.GroupAndroidPackageUrl(r)
 
 	params := map[string]string{
 		"serial": "192.168.2.198:5555",
@@ -162,7 +164,7 @@ func TestAndroidCurrentPackageName(t *testing.T) {
 
 func TestReportList(t *testing.T) {
 	r := getGinEngine()
-	server.InitDB("test.db")
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -189,8 +191,8 @@ func TestReportList(t *testing.T) {
 
 func TestReportGetConfig(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -215,8 +217,8 @@ func TestReportGetConfig(t *testing.T) {
 
 func TestReportGetSummary(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -241,8 +243,8 @@ func TestReportGetSummary(t *testing.T) {
 
 func TestReportGetProcCpuData(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -267,8 +269,8 @@ func TestReportGetProcCpuData(t *testing.T) {
 
 func TestReportGetProcMemData(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -293,8 +295,8 @@ func TestReportGetProcMemData(t *testing.T) {
 
 func TestReportGetThreadData(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -319,8 +321,8 @@ func TestReportGetThreadData(t *testing.T) {
 
 func TestReportGetSysNetworkData(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -345,8 +347,8 @@ func TestReportGetSysNetworkData(t *testing.T) {
 
 func TestReportGetSysMemData(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -371,8 +373,8 @@ func TestReportGetSysMemData(t *testing.T) {
 
 func TestReportGetSysCpuData(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{
@@ -397,8 +399,8 @@ func TestReportGetSysCpuData(t *testing.T) {
 
 func TestReportGetSysFrameData(t *testing.T) {
 	r := getGinEngine()
-	server.SetSQLDebug(true)
-	server.InitDB("test.db")
+	db.SetSQLDebug(true)
+	db.InitDB("test.db")
 	server.GroupReportUrl(r)
 
 	params := map[string]string{

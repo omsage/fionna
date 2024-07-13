@@ -1,4 +1,4 @@
-package server
+package android
 
 import (
 	"fionna/android/android_util"
