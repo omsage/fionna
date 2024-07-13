@@ -12,7 +12,7 @@ import (
 
 func TestPerfTool(t *testing.T) {
 	SetClient()
-	device, err := android_util.GetDevice(client, "")
+	device, err := android_util.GetDevice(client, "emulator-5554")
 	if err != nil {
 		panic(err)
 	}

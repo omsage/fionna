@@ -27,6 +27,7 @@ type PerfTool struct {
 	frameSocket       net.Conn
 	exitCallBackFunc  context.CancelFunc
 	exitCtx           context.Context
+	startToolFlag     bool
 	perfFrameDataChan chan *entity.SysFrameInfo
 }
 
@@ -98,7 +99,7 @@ func (s *PerfTool) Init() {
 	} else if strings.Contains(abi, "armeabi-v7a") {
 		s.dev.Push(bytes.NewReader(libArm32), libPushPath, time.Now())
 	} else if strings.Contains(abi, "x86_64") {
-		s.dev.Push(bytes.NewReader(lib86), libPushPath, time.Now())
+		s.dev.Push(bytes.NewReader(lib86_64), libPushPath, time.Now())
 	} else {
 		s.dev.Push(bytes.NewReader(lib86_64), libPushPath, time.Now())
 	}
@@ -156,6 +157,7 @@ func (s *PerfTool) runBinary(cid int) {
 				return
 			default:
 				n, err = output.Read(bytesOutput)
+				//log.Info(string(bytesOutput[:n]))
 				if err != nil {
 					// 如果发生超时错误，你可以根据具体情况进行处理
 					if err1, ok := err.(net.Error); ok && err1.Timeout() {
@@ -166,12 +168,13 @@ func (s *PerfTool) runBinary(cid int) {
 					log.Error("frame output err,", err)
 					return
 				}
-				log.Debug(string(bytesOutput[:n]))
+				log.Info(string(bytesOutput[:n]))
 			}
 
 		}
 	}()
 	isRelease.Wait()
+	s.startToolFlag = true
 }
 
 func (s *PerfTool) startServer() {
@@ -228,7 +231,6 @@ func (s *PerfTool) getFrameSteam() {
 
 func (s *PerfTool) GetFrame(getBackCall func(frame *entity.SysFrameInfo, code entity.ServerCode)) {
 	ticker := time.NewTicker(1 * time.Second)
-	isNoFirst := false
 	go func() {
 		for {
 			<-ticker.C
@@ -237,12 +239,11 @@ func (s *PerfTool) GetFrame(getBackCall func(frame *entity.SysFrameInfo, code en
 			}
 			select {
 			case perfData, ok := <-s.perfFrameDataChan:
-				isNoFirst = true
 				if ok && getBackCall != nil {
 					getBackCall(perfData, entity.RequestSucceed)
 				}
 			default:
-				if isNoFirst {
+				if s.startToolFlag {
 					getBackCall(&entity.SysFrameInfo{Timestamp: time.Now().UnixMilli()}, entity.RequestSucceed)
 				}
 			}
