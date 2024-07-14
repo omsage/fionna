@@ -10,7 +10,6 @@ import (
 	"fionna/entity"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"io"
 	"math/rand"
 	"net"
 	"path"
@@ -120,9 +119,9 @@ func (s *PerfTool) Init() {
 }
 
 func (s *PerfTool) runBinary(cid int) {
-	var output io.Reader
+	var output net.Conn
 
-	output, err := s.dev.RunShellLoopCommand(fmt.Sprintf(
+	output, err := s.dev.RunShellLoopCommandSock(fmt.Sprintf(
 		"LD_LIBRARY_PATH=/system/lib64:/system_ext/lib64:%s "+
 			"CLASSPATH=%s "+
 			"app_process / com.omsage.PerfTool.Run 1.0 cid=%d",
@@ -145,7 +144,6 @@ func (s *PerfTool) runBinary(cid int) {
 		}
 		if !strings.Contains(string(bytesOutput[:n]), "Device") {
 			s.clientStop()
-			// todo
 			log.Error("start fail! output: " + string(bytesOutput[:n]))
 			return
 		}
@@ -154,6 +152,7 @@ func (s *PerfTool) runBinary(cid int) {
 		for {
 			select {
 			case <-s.exitCtx.Done():
+				output.Close()
 				return
 			default:
 				n, err = output.Read(bytesOutput)
@@ -183,6 +182,7 @@ func (s *PerfTool) startServer() {
 		s.frameSocket, err = s.perfToolLn.Accept()
 		if err != nil {
 			// todo
+			log.Error(err)
 			s.frameSocket = nil
 			s.exitCallBackFunc()
 		}

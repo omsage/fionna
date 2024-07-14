@@ -10,10 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var touchMap map[string]*touch.Touch = make(map[string]*touch.Touch)
-
 func AndroidControl(r *gin.Engine) {
 	r.GET("/android/control", func(c *gin.Context) {
+
+		var touchMap map[string]*touch.Touch = make(map[string]*touch.Touch)
+
+		var perfMap map[string]context.CancelFunc = make(map[string]context.CancelFunc)
+
 		ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
 			log.Print("Error during connection upgradation:", err)
@@ -37,8 +40,6 @@ func AndroidControl(r *gin.Engine) {
 		control := touchMap[device.Serial()]
 
 		exitCtx, exitFn := context.WithCancel(context.Background())
-
-		perfExitCtx, perfExitFn := context.WithCancel(exitCtx)
 
 		var message entity.PerfRecvMessage
 
@@ -70,11 +71,18 @@ func AndroidControl(r *gin.Engine) {
 						switch message.MessageType {
 						case entity.ClosePerfType:
 							log.Println("client send close perf info,close perf...")
-							perfExitFn()
+							if perfExitFn, ok := perfMap[device.Serial()]; ok {
+								perfExitFn()
+							}
 						case entity.StartPerfType:
 							var perfConfig = &entity.PerfConfig{
 								IntervalTime: 1,
 							}
+
+							perfExitCtx, perfExitFn := context.WithCancel(exitCtx)
+
+							perfMap[device.Serial()] = perfExitFn
+
 							err1 = json.Unmarshal(data, perfConfig)
 							if err1 != nil {
 								break

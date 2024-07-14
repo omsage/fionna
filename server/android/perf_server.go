@@ -1,8 +1,6 @@
 package android
 
 import (
-	"context"
-	"encoding/json"
 	"fionna/android/android_util"
 	"fionna/android/gadb"
 	"fionna/android/perf"
@@ -10,7 +8,6 @@ import (
 	"fionna/server/db"
 	"fionna/server/util"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -418,138 +415,6 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 			})
 		}()
 	}
-}
-
-func WebSocketPerf(r *gin.Engine) {
-	r.GET("/android/perf", func(c *gin.Context) {
-
-		ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
-		if err != nil {
-			log.Print("Error during connection upgradation:", err)
-			return
-		}
-
-		serialInfo := &entity.SerialInfo{}
-		// todo add error
-		ws.ReadJSON(serialInfo)
-
-		device, err := android_util.GetDevice(client, serialInfo.SerialName)
-		if err != nil {
-			ws.WriteJSON(entity.NewPerfDataError(err.Error()))
-			log.Error(err)
-		}
-
-		exitCtx, exitFn := context.WithCancel(context.Background())
-
-		var message entity.PerfRecvMessage
-
-		go func() {
-			for {
-				select {
-				case <-exitCtx.Done():
-					return
-				default:
-					defer func() {
-						if r := recover(); r != nil {
-							log.Error("perf ws recovered:", r)
-							exitFn()
-						}
-					}()
-					err := ws.ReadJSON(&message)
-					if err != nil {
-						log.Error("perf read message steam err:", err)
-						ws.WriteJSON(entity.NewPerfDataError("perf read message steam err:" + err.Error()))
-						break
-					} else {
-						if message.MessageType == entity.StartPerfType {
-
-							data, err1 := json.Marshal(message.Data)
-							if err1 != nil {
-								log.Error("perf the data sent is not json")
-								ws.WriteJSON(entity.NewPerfDataError("perf the data sent is not json"))
-								break
-							}
-							// todo uuid
-							var perfConfig = &entity.PerfConfig{
-								IntervalTime: 1,
-							}
-							err1 = json.Unmarshal(data, perfConfig)
-
-							if err1 == nil {
-
-								id := uuid.New()
-
-								//reportBase := &entity.BaseModel{
-								//	UUID: id.String(),
-								//}
-								currentTime := time.Now()
-
-								// 格式化时间为字符串
-								formattedTime := currentTime.Format("2006-01-02 15:04:05")
-
-								var testName = ""
-
-								if perfConfig.PackageName != "" && perfConfig.Pid != "" {
-									testName = fmt.Sprintf("%s_%s_%s_pid%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.PackageName, perfConfig.Pid, formattedTime)
-								} else if perfConfig.PackageName != "" && perfConfig.Pid == "" {
-
-									testName = fmt.Sprintf("%s_%s_%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.PackageName, formattedTime)
-
-									perfConfig.Pid, err = android_util.GetPidOnPackageName(device, perfConfig.PackageName)
-
-									if err != nil {
-										log.Error("get pid err:", err)
-										ws.WriteJSON(entity.NewPerfDataError("get pid err:" + err.Error()))
-										break
-									}
-								} else if perfConfig.PackageName == "" && perfConfig.Pid != "" {
-									testName = fmt.Sprintf("%s_%s_pid%s_%s", serialInfo.ProductDevice, serialInfo.Model, perfConfig.Pid, formattedTime)
-								} else {
-									testName = fmt.Sprintf("%s_%s_%s", serialInfo.ProductDevice, serialInfo.Model, formattedTime)
-								}
-
-								serialInfo.TestName = &testName
-								timestamp := time.Now().UnixMilli()
-
-								serialInfo.Timestamp = &timestamp
-								serialInfo.PackageName = &perfConfig.PackageName
-
-								if serialInfo.UUID == "" {
-									serialInfo.UUID = id.String()
-								}
-
-								db.GetDB().Create(serialInfo)
-
-								if perfConfig.IntervalTime == 0 {
-									perfConfig.IntervalTime = 1
-								}
-
-								perfConfig.Ctx = exitCtx
-								perfConfig.CancelFn = exitFn
-
-								perfConfig.UUID = id.String()
-								db.GetDB().Create(perfConfig)
-
-								startGetPerf(ws, device, *perfConfig)
-
-							} else {
-								log.Error("conversion message error,", err1)
-								ws.WriteJSON(entity.NewPerfDataError(err1.Error()))
-								break
-							}
-						}
-						if message.MessageType == entity.ClosePerfType {
-							log.Println("client send close perf info,close perf...")
-							exitFn()
-						}
-						if message.MessageType == entity.PongPerfType {
-							continue
-						}
-					}
-				}
-			}
-		}()
-	})
 }
 
 func initPerfAndStart(serialInfo *entity.SerialInfo, perfConfig *entity.PerfConfig, device *gadb.Device, ws *websocket.Conn) {
