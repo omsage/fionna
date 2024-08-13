@@ -251,8 +251,8 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 
 					//if strings.Contains(netV.InterfaceName, "wlan") {
 
-					sysNetOverview.AllSysTxData += netV.Tx
-					sysNetOverview.AllSysRxData += netV.Rx
+					sysNetOverview.AllSysTxData = netV.Tx
+					sysNetOverview.AllSysRxData = netV.Rx
 
 					go func(netV entity.SystemNetworkInfo) {
 
