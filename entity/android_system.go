@@ -1,5 +1,11 @@
 package entity
 
+type SystemNetworkData struct {
+	UUID      string `json:"-" gorm:"primaryKey"`
+	Data      string `json:"data" gorm:"primaryKey"    xlsx:"A-data"`
+	Timestamp int64  `json:"timestamp,omitempty" gorm:"primaryKey"   xlsx:"B-timestamp"`
+}
+
 type SystemNetworkInfo struct {
 	InterfaceName string  `json:"interfaceName"  gorm:"primaryKey"    xlsx:"A-interfaceName"`
 	UUID          string  `json:"-" gorm:"primaryKey"`
@@ -21,6 +27,12 @@ type SystemCpuRaw struct {
 	Steal   uint64 // time spent in other OSes when running in a virtualized environment
 	Guest   uint64 // time spent running a virtual CPU for guest operating systems under the control of the Linux kernel.
 	Total   uint64 // total of all time fields
+}
+
+type SystemCPUData struct {
+	UUID      string `json:"-" gorm:"primaryKey"`
+	Data      string `json:"data" gorm:"primaryKey"    xlsx:"A-data"`
+	Timestamp int64  `json:"timestamp,omitempty" gorm:"primaryKey"   xlsx:"B-timestamp"`
 }
 
 type SystemCPUInfo struct {

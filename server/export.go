@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fionna/entity"
 	"fionna/server/db"
 	"fmt"
@@ -51,9 +52,17 @@ func Export2Excel(uuid string) *excelize.File {
 	// todo dao?this project is not so strict
 
 	if perfConfig.SysCpu {
-		var sysCpuDatas []entity.SystemCPUInfo
+		var sysCpuDatas []entity.SystemCPUData
+		var sysCpuInfos []entity.SystemCPUInfo
 		db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&sysCpuDatas)
-		writeSheet(xlsx, "sys-cpu", sysCpuDatas)
+		for _, sCpuData := range sysCpuDatas {
+			temp := make(map[string]entity.SystemCPUInfo)
+			json.Unmarshal([]byte(sCpuData.Data), &temp)
+			for _, t := range temp {
+				sysCpuInfos = append(sysCpuInfos, t)
+			}
+		}
+		writeSheet(xlsx, "sys-cpu", sysCpuInfos)
 
 		var cpuSummarys []entity.SystemCPUSummary
 		db.GetDB().Where("uuid = ?", uuid).Find(&cpuSummarys)
@@ -83,9 +92,18 @@ func Export2Excel(uuid string) *excelize.File {
 	}
 
 	if perfConfig.SysNetwork {
-		var SysNetworkDatas []entity.SystemNetworkInfo
+		var SysNetworkDatas []entity.SystemNetworkData
+		var SysNetworkInfos []entity.SystemNetworkInfo
 		db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&SysNetworkDatas)
-		writeSheet(xlsx, "sys-network", SysNetworkDatas)
+
+		for _, sCpuData := range SysNetworkDatas {
+			temp := make(map[string]entity.SystemNetworkInfo)
+			json.Unmarshal([]byte(sCpuData.Data), &temp)
+			for _, t := range temp {
+				SysNetworkInfos = append(SysNetworkInfos, t)
+			}
+		}
+		writeSheet(xlsx, "sys-network", SysNetworkInfos)
 
 		var netSummarys []entity.SystemNetworkSummary
 		db.GetDB().Where("uuid = ?", uuid).Find(&netSummarys)

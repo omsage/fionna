@@ -1,6 +1,7 @@
 package android
 
 import (
+	"encoding/json"
 	"fionna/android/android_util"
 	"fionna/android/gadb"
 	"fionna/android/perf"
@@ -152,6 +153,11 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 			var lock sync.Mutex
 			perf.GetSysCPU(device, config, func(CPU map[string]*entity.SystemCPUInfo, code entity.ServerCode) {
 				lock.Lock()
+				go func() {
+					d, _ := json.Marshal(CPU)
+					sCpu := &entity.SystemCPUData{UUID: config.UUID, Data: string(d), Timestamp: time.Now().UnixMilli()}
+					db.GetDB().Create(sCpu)
+				}()
 				for cpuName, value := range CPU {
 					value.UUID = config.UUID
 
@@ -232,6 +238,11 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 			var lock sync.Mutex
 			perf.GetSysNetwork(device, config, func(sysNet map[string]*entity.SystemNetworkInfo, code entity.ServerCode) {
 				lock.Lock()
+				go func() {
+					d, _ := json.Marshal(sysNet)
+					sNet := &entity.SystemNetworkData{UUID: config.UUID, Data: string(d), Timestamp: time.Now().UnixMilli()}
+					db.GetDB().Create(sNet)
+				}()
 				for name, netV := range sysNet {
 
 					if count == 0 {
@@ -254,16 +265,15 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 					sysNetOverview.AllSysTxData = netV.Tx
 					sysNetOverview.AllSysRxData = netV.Rx
 
-					go func(netV entity.SystemNetworkInfo) {
+					go func() {
 
-						db.GetDB().Create(&netV)
 						if count == 0 {
 							db.GetDB().Create(sysNetOverview)
 						} else {
 							db.GetDB().Save(sysNetOverview)
 						}
 
-					}(*netV)
+					}()
 
 				}
 				count++

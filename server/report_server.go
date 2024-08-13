@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fionna/entity"
 	"fionna/server/db"
 	"fionna/server/util"
@@ -121,7 +122,7 @@ func GroupReportUrl(r *gin.Engine) {
 			}
 
 			if perfConfig.SysCpu {
-				db.GetDB().Delete(&entity.SystemCPUInfo{UUID: info})
+				db.GetDB().Delete(&entity.SystemCPUData{UUID: info})
 				db.GetDB().Delete(&entity.SystemCPUSummary{UUID: info})
 			}
 
@@ -136,7 +137,7 @@ func GroupReportUrl(r *gin.Engine) {
 			}
 
 			if perfConfig.SysNetwork {
-				db.GetDB().Delete(&entity.SystemNetworkInfo{UUID: info})
+				db.GetDB().Delete(&entity.SystemNetworkData{UUID: info})
 				db.GetDB().Delete(&entity.SystemNetworkSummary{UUID: info})
 			}
 
@@ -361,10 +362,18 @@ func GroupReportUrl(r *gin.Engine) {
 		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.SysCpu {
-			var sysCpuDatas []entity.SystemCPUInfo
+			var sysCpuDatas []entity.SystemCPUData
+			var sysCpuInfos []entity.SystemCPUInfo
 			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&sysCpuDatas)
+			for _, sCpuData := range sysCpuDatas {
+				temp := make(map[string]entity.SystemCPUInfo)
+				json.Unmarshal([]byte(sCpuData.Data), &temp)
+				for _, t := range temp {
+					sysCpuInfos = append(sysCpuInfos, t)
+				}
+			}
 			c.JSON(http.StatusOK, entity.ResponseData{
-				Data: sysCpuDatas,
+				Data: sysCpuInfos,
 				Code: entity.RequestSucceed,
 			})
 		} else {
@@ -451,10 +460,20 @@ func GroupReportUrl(r *gin.Engine) {
 		db.GetDB().First(&perfConfig, "uuid = ?", uuid)
 
 		if perfConfig.SysNetwork {
-			var SysNetworkDatas []entity.SystemNetworkInfo
+			var SysNetworkDatas []entity.SystemNetworkData
+			var SysNetworkInfos []entity.SystemNetworkInfo
 			db.GetDB().Order("timestamp asc").Where("uuid = ?", uuid).Find(&SysNetworkDatas)
+
+			for _, sCpuData := range SysNetworkDatas {
+				temp := make(map[string]entity.SystemNetworkInfo)
+				json.Unmarshal([]byte(sCpuData.Data), &temp)
+				for _, t := range temp {
+					SysNetworkInfos = append(SysNetworkInfos, t)
+				}
+			}
+
 			c.JSON(http.StatusOK, entity.ResponseData{
-				Data: SysNetworkDatas,
+				Data: SysNetworkInfos,
 				Code: entity.RequestSucceed,
 			})
 		} else {

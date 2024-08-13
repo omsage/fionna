@@ -79,8 +79,8 @@ func InitDB(dbName string) {
 		}
 	}
 
-	if !db.Migrator().HasTable(&entity.SystemCPUInfo{}) {
-		err = db.AutoMigrate(&entity.SystemCPUInfo{})
+	if !db.Migrator().HasTable(&entity.SystemCPUData{}) {
+		err = db.AutoMigrate(&entity.SystemCPUData{})
 		if err != nil {
 			panic(err)
 		}
@@ -100,8 +100,8 @@ func InitDB(dbName string) {
 		}
 	}
 
-	if !db.Migrator().HasTable(&entity.SystemNetworkInfo{}) {
-		err = db.AutoMigrate(&entity.SystemNetworkInfo{})
+	if !db.Migrator().HasTable(&entity.SystemNetworkData{}) {
+		err = db.AutoMigrate(&entity.SystemNetworkData{})
 		if err != nil {
 			panic(err)
 		}
