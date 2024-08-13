@@ -89,7 +89,7 @@ func AndroidControl(r *gin.Engine) {
 							}
 							perfConfig.Ctx = perfExitCtx
 							perfConfig.CancelFn = perfExitFn
-							initPerfAndStart(serialInfo, perfConfig, device, ws)
+							InitPerfAndStart(serialInfo, perfConfig, device, ws)
 						case entity.ControlTouchType:
 							touchInfo := &entity.TouchInfo{}
 							err1 = json.Unmarshal(data, touchInfo)

@@ -1,6 +1,8 @@
 package util
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"sync"
 )
@@ -25,7 +27,13 @@ func (s *SafeWebsocket) ReadJSON(v interface{}) error {
 func (s *SafeWebsocket) WriteJSON(v interface{}) error {
 	var err error
 	s.lock.Lock()
-	err = s.ws.WriteJSON(v)
+	if s.ws != nil {
+		err = s.ws.WriteJSON(v)
+	} else {
+		var data []byte
+		data, err = json.Marshal(&v)
+		fmt.Println(string(data))
+	}
 	s.lock.Unlock()
 	return err
 }

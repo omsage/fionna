@@ -417,7 +417,7 @@ func startGetPerf(perfWsConn *websocket.Conn, device *gadb.Device, config entity
 	}
 }
 
-func initPerfAndStart(serialInfo *entity.SerialInfo, perfConfig *entity.PerfConfig, device *gadb.Device, ws *websocket.Conn) {
+func InitPerfAndStart(serialInfo *entity.SerialInfo, perfConfig *entity.PerfConfig, device *gadb.Device, ws *websocket.Conn) {
 	id := uuid.New()
 
 	currentTime := time.Now()
@@ -453,17 +453,14 @@ func initPerfAndStart(serialInfo *entity.SerialInfo, perfConfig *entity.PerfConf
 	serialInfo.Timestamp = &timestamp
 	serialInfo.PackageName = &perfConfig.PackageName
 
-	if serialInfo.UUID == "" {
-		serialInfo.UUID = id.String()
-	}
-
+	serialInfo.UUID = id.String()
+	perfConfig.UUID = id.String()
 	db.GetDB().Create(serialInfo)
 
 	if perfConfig.IntervalTime == 0 {
 		perfConfig.IntervalTime = 1
 	}
 
-	perfConfig.UUID = id.String()
 	db.GetDB().Create(perfConfig)
 
 	startGetPerf(ws, device, *perfConfig)

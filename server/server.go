@@ -5,6 +5,7 @@ import (
 	"fionna/server/android"
 	"fionna/server/db"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/qingstor/go-mime"
@@ -23,23 +24,6 @@ var upGrader = websocket.Upgrader{
 	},
 } // use default options
 
-func Cors() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		method := c.Request.Method
-		origin := c.Request.Header.Get("Origin")
-		if origin != "" {
-			c.Header("Access-Control-Allow-Origin", origin) // 可将将 * 替换为指定的域名
-			c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
-			c.Header("Access-Control-Allow-Headers", "*")
-			c.Header("Access-Control-Allow-Credentials", "true")
-		}
-		if method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-		}
-		c.Next()
-	}
-}
-
 var (
 	dist      embed.FS
 	indexHtml []byte
@@ -55,7 +39,7 @@ func Init(dbName string) {
 	android.Init(upGrader)
 
 	r := gin.Default()
-	r.Use(Cors())
+	r.Use(cors.Default())
 
 	r.GET("/", func(c *gin.Context) {
 		c.Data(http.StatusOK, "text/html", indexHtml)
